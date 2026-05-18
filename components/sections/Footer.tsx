@@ -22,6 +22,7 @@ export function Footer() {
   const nav = [
     { href: '#story', label: tNav('story') },
     { href: '#courses', label: tNav('courses') },
+    { href: '#journey', label: tNav('journey') },
     { href: '#schedule', label: tNav('schedule') },
     { href: '#wins', label: tNav('wins') },
     { href: '#assess', label: tNav('assess') },

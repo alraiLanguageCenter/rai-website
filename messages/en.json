@@ -9,6 +9,7 @@
     "courses": "Courses",
     "why": "Why Us",
     "schedule": "Schedule",
+    "journey": "Your Journey",
     "wins": "Success Stories",
     "assess": "Free Assessment",
     "book": "Book Assessment",
@@ -81,6 +82,20 @@
       { "title": "Modern, interactive curriculum", "body": "Continuously updated materials that blend the book, live practice, and technology." },
       { "title": "Supportive environment", "body": "A safe space to learn — make mistakes with confidence, grow faster than expected." },
       { "title": "Documented results", "body": "Thousands of graduates, hundreds of success stories, and distinguished international exam scores." }
+    ]
+  },
+  "journey": {
+    "eyebrow": "Your journey",
+    "title": "How we help you master English.",
+    "lede": "Five steps from your first hello to fluent confidence — supported every step of the way.",
+    "start": "Start",
+    "finish": "Success",
+    "steps": [
+      { "n": "01", "title": "Free placement test", "body": "We assess your current level — online quiz or in-center — and find your starting point." },
+      { "n": "02", "title": "Personalized plan", "body": "We craft a learning path tailored to your age, level, and goal: conversation, exams, or business." },
+      { "n": "03", "title": "Live, interactive classes", "body": "Small groups or one-on-one, with experienced instructors and weekly interactive assignments." },
+      { "n": "04", "title": "Progress tracking", "body": "Continuous monitoring with milestones, mock tests, and clear feedback at every stage." },
+      { "n": "05", "title": "You speak with confidence", "body": "Real fluency you use in life, work, and study — and a certificate that proves it." }
     ]
   },
   "wins": {

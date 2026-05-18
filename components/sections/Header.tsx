@@ -22,8 +22,8 @@ export function Header() {
   const nav = [
     { href: '#story', label: t('story') },
     { href: '#courses', label: t('courses') },
+    { href: '#journey', label: t('journey') },
     { href: '#schedule', label: t('schedule') },
-    { href: '#wins', label: t('wins') },
     { href: '#assess', label: t('assess') },
     { href: '#contact', label: t('contact') },
   ];

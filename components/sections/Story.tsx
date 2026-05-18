@@ -47,8 +47,8 @@ export function Story() {
           <Reveal y={48}>
             <motion.div style={{ y: imgY }} className="relative aspect-[3/4] overflow-hidden rounded-sm ring-1 ring-[var(--color-line)]">
               <Image
-                src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=900&q=80"
-                alt=""
+                src="/brand/story.png"
+                alt="Rai Language Center — three decades of language education"
                 fill priority={false} sizes="(min-width: 1024px) 40vw, 90vw"
                 className="object-cover"
               />

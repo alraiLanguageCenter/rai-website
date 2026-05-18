@@ -18,12 +18,12 @@ export function Logo({ className, withText = true, animated = false }: { classNa
         className="shrink-0"
       >
         <Image
-          src="/brand/rlc-logo.svg"
+          src="/brand/rlc-logo.jpg"
           alt="RLC"
-          width={44}
-          height={44}
+          width={56}
+          height={56}
           priority
-          className="h-11 w-11"
+          className="h-12 w-12 rounded-sm object-contain"
         />
       </motion.div>
       {withText && (

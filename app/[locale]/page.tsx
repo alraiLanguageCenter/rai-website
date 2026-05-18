@@ -7,6 +7,7 @@ import { Story } from '@/components/sections/Story';
 import { Announcements } from '@/components/sections/Announcements';
 import { Courses } from '@/components/sections/Courses';
 import { WhyUs } from '@/components/sections/WhyUs';
+import { Journey } from '@/components/sections/Journey';
 import { Schedule } from '@/components/sections/Schedule';
 import { WallOfWins } from '@/components/sections/WallOfWins';
 import { Testimonials } from '@/components/sections/Testimonials';
@@ -28,6 +29,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Announcements />
       <Courses />
       <WhyUs />
+      <Journey />
       <Schedule />
       <WallOfWins />
       <Testimonials />
