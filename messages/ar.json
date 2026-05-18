@@ -24,7 +24,20 @@
     "lede": "ثلاثون عاماً من بناء الثقة وفتح الأبواب. انضمّ إلى آلاف الطلاب الذين اختاروا الراعي لإتقان اللغة.",
     "primaryCta": "ابدأ التقييم المجاني",
     "secondaryCta": "اكتشف دوراتنا",
-    "scrollHint": "اسحب للأسفل"
+    "scrollHint": "اسحب للأسفل",
+    "ticker": [
+      "تحدّث بثقة.",
+      "أتقن اللغة.",
+      "افتح أبواباً جديدة.",
+      "اكتشف صوتك."
+    ],
+    "greetings": [
+      { "en": "Hello!", "ar": "مرحباً!" },
+      { "en": "Welcome.", "ar": "أهلاً." },
+      { "en": "Nice to meet you.", "ar": "تشرّفنا." },
+      { "en": "Let's begin.", "ar": "لنبدأ." }
+    ],
+    "floatingWords": ["Hello", "Speak", "Listen", "Read", "Write", "Confidence", "Fluency", "Welcome", "Conversation", "Discover"]
   },
   "brandStrip": {
     "learn": "تعلّم",
