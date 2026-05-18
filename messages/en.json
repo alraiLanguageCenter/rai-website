@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "title": "Rai Language Center | Learn. Connect. Succeed. Since 1995",
+    "description": "Rai Language Center in Latakia — kids & teens programs, adult courses, TOEFL & IELTS prep, Business English, and a free placement test. Since 1995.",
+    "ogAlt": "Rai Language Center — Learn. Connect. Succeed."
+  },
+  "nav": {
+    "story": "Our Story",
+    "courses": "Courses",
+    "why": "Why Us",
+    "schedule": "Schedule",
+    "wins": "Success Stories",
+    "assess": "Free Assessment",
+    "book": "Book Assessment",
+    "contact": "Contact",
+    "bookSession": "Book a session",
+    "switchTo": "العربية"
+  },
+  "hero": {
+    "eyebrow": "Since 1995",
+    "headline": "Learn. Connect.",
+    "headlineAccent": "Succeed.",
+    "lede": "Thirty years of building confidence and opening doors. Join the thousands who chose Rai to master a language.",
+    "primaryCta": "Take the free placement test",
+    "secondaryCta": "Explore courses",
+    "scrollHint": "Scroll"
+  },
+  "brandStrip": {
+    "learn": "Learn",
+    "connect": "Connect",
+    "succeed": "Succeed",
+    "tagline": "Building confidence. Opening opportunities."
+  },
+  "trust": {
+    "since": "Founded",
+    "years": "Years of excellence",
+    "students": "Students taught",
+    "exams": "TOEFL & IELTS"
+  },
+  "story": {
+    "eyebrow": "Our story",
+    "title": "Three decades of excellence in language education.",
+    "p1": "Our journey began in 1995 with a simple ambition: that every learner in Latakia could master a language with confidence, in a way that respected their intelligence and their time.",
+    "p2": "Today, thousands of graduates later, we still believe the best education starts with a real human relationship between teacher and student — nourished by a modern curriculum, and crowned by results.",
+    "signature": "Nouha Raei",
+    "signatureTitle": "Founder & Director"
+  },
+  "announcements": {
+    "eyebrow": "Announcements",
+    "title": "What's new.",
+    "empty": "No active announcements.",
+    "viewFlyer": "View flyer"
+  },
+  "courses": {
+    "eyebrow": "Our courses",
+    "title": "Four paths. One goal: language mastery.",
+    "items": [
+      { "id": "kids", "title": "Kids & Teens", "tag": "Ages 7 – 17", "summary": "Programs designed to build fluency through fun and interaction.", "details": "We use educational games, stories, and group activities to build a strong language foundation and lasting love of learning. Small groups, similar age cohorts.", "cta": "Reserve a seat" },
+      { "id": "adults", "title": "Adult Conversation", "tag": "All levels", "summary": "From zero to fluent — a practical curriculum that puts conversation first.", "details": "We integrate all four skills with a special focus on real-world conversation: everyday situations, debates, and presentations. Morning and evening groups.", "cta": "Get started" },
+      { "id": "exams", "title": "TOEFL & IELTS Prep", "tag": "International exams", "summary": "Intensive training and weekly reviews with full mock exams.", "details": "We cover all four sections with specialized strategies. Detailed performance analysis and training to manage time and pressure on exam day.", "cta": "Start preparing" },
+      { "id": "business", "title": "Business English", "tag": "For professionals", "summary": "Professional workplace language: correspondence, presentations, negotiation, and meetings.", "details": "Content designed for the demands of modern work: writing emails and reports, presenting, and the vocabulary of your industry. Private or group sessions.", "cta": "Level up" }
+    ]
+  },
+  "schedule": {
+    "eyebrow": "Schedule",
+    "title": "Book your next slot.",
+    "tabs": { "courses": "Courses", "exams": "Exams" },
+    "kind": { "course": "Course", "exam": "Exam" },
+    "status": { "open": "Open", "closed": "Closed", "full": "Full" },
+    "register": "Register",
+    "soldOut": "Sold out",
+    "viewAll": "All slots",
+    "empty": "No upcoming entries.",
+    "fields": { "starts": "Starts", "ends": "Ends", "room": "Room", "seats": "Seats left" }
+  },
+  "why": {
+    "eyebrow": "Why us",
+    "title": "Standards we won't compromise on.",
+    "items": [
+      { "title": "Experienced instructors", "body": "A handpicked team with strong academic backgrounds and real teaching experience." },
+      { "title": "Modern, interactive curriculum", "body": "Continuously updated materials that blend the book, live practice, and technology." },
+      { "title": "Supportive environment", "body": "A safe space to learn — make mistakes with confidence, grow faster than expected." },
+      { "title": "Documented results", "body": "Thousands of graduates, hundreds of success stories, and distinguished international exam scores." }
+    ]
+  },
+  "wins": {
+    "eyebrow": "Success stories",
+    "title": "Wall of wins.",
+    "lede": "Real graduates. Real certificates. Dreams turned into reality.",
+    "swipeHint": "Swipe to browse"
+  },
+  "testimonials": {
+    "eyebrow": "What they say",
+    "title": "In their words.",
+    "items": [
+      { "name": "Ali Nasser", "course": "Language & Conversation", "quote": "The lessons were engaging and genuinely fun, but what touched me most was feeling part of a real learning community." },
+      { "name": "Sarah Ahmed", "course": "Business English", "quote": "For the first time I feel fully confident in meetings. The results showed in just a few weeks." },
+      { "name": "Reem Khoury", "course": "IELTS Prep", "quote": "I scored 8.0 on the IELTS on my first attempt — thanks to the method and the weekly mock exams." },
+      { "name": "Mohammed Al-Hasan", "course": "TOEFL Prep", "quote": "The instructors don't just teach you the language — they teach you to think in it." },
+      { "name": "Layla Deeb", "course": "Language & Conversation", "quote": "I started from zero, and within a year I was reading English novels for pleasure." }
+    ]
+  },
+  "assess": {
+    "eyebrow": "Placement test",
+    "title": "Find your level — free.",
+    "lede": "A short 10-minute test. We'll determine your CEFR level and recommend the right book for you.",
+    "start": "Start the test",
+    "question": "Question {n} of {total}",
+    "next": "Next",
+    "prev": "Back",
+    "submit": "Finish and see result",
+    "loading": "Preparing your test...",
+    "resultTitle": "Your level:",
+    "recommendedBooks": "Recommended books",
+    "captureTitle": "Save your result",
+    "captureLede": "We'll email your result with a suggested study plan.",
+    "emailLabel": "Email",
+    "send": "Send result",
+    "sent": "Sent successfully",
+    "restart": "Take it again"
+  },
+  "book": {
+    "eyebrow": "Book a personal assessment",
+    "title": "In-center assessment.",
+    "lede": "Pick three preferred slots — we'll confirm one within 24 business hours by email and WhatsApp.",
+    "form": {
+      "name": "Full name",
+      "namePh": "Your name",
+      "email": "Email",
+      "emailPh": "you@example.com",
+      "phone": "Phone (WhatsApp)",
+      "phonePh": "+963 ...",
+      "ageGroup": "Age group",
+      "ageGroupPh": "Choose group",
+      "ages": { "child": "Child (7–12)", "teen": "Teen (13–17)", "adult": "Adult (18+)", "professional": "Professional" },
+      "slots": "Three preferred slots",
+      "slotPh": "Pick a date and time",
+      "addSlot": "Add a slot",
+      "notes": "Notes (optional)",
+      "notesPh": "Anything else we should know...",
+      "submit": "Send request",
+      "submitting": "Sending...",
+      "successTitle": "Request received",
+      "successBody": "We'll send confirmation soon via email and WhatsApp.",
+      "errorTitle": "Couldn't send",
+      "errorBody": "Try again or contact us directly."
+    }
+  },
+  "contact": {
+    "eyebrow": "Get in touch",
+    "title": "Tell us.",
+    "lede": "General questions, pricing, or anything else — we'll reply within 24 business hours.",
+    "form": {
+      "name": "Full name",
+      "namePh": "Your name",
+      "email": "Email",
+      "emailPh": "you@example.com",
+      "phone": "Phone",
+      "phonePh": "+963 ...",
+      "course": "Course of interest",
+      "coursePh": "Choose a course",
+      "courseOptions": { "kids": "Kids & Teens", "adults": "Adult Conversation", "exams": "TOEFL/IELTS Prep", "business": "Business English", "other": "Other" },
+      "message": "Your message",
+      "messagePh": "Tell us about your level and goal...",
+      "submit": "Send",
+      "submitting": "Sending...",
+      "successTitle": "Message received",
+      "successBody": "We'll be in touch soon.",
+      "errorTitle": "Couldn't send",
+      "errorBody": "Please try again."
+    },
+    "info": {
+      "addressTitle": "Address",
+      "address": "Latakia — Syria\nOmar Ibn Al-Khattab Street (Al-Quwatli)",
+      "phoneTitle": "Call us",
+      "emailTitle": "Email",
+      "hoursTitle": "Opening hours",
+      "hours": "Saturday – Thursday\n9:00 am – 9:00 pm"
+    }
+  },
+  "footer": {
+    "tagline": "Learn. Connect. Succeed. Since 1995.",
+    "rights": "© {year} Rai Language Center. All rights reserved.",
+    "made": "Crafted with care in Latakia"
+  },
+  "validation": {
+    "nameMin": "Name is too short",
+    "emailInvalid": "Email format is invalid",
+    "phoneInvalid": "Phone number is invalid",
+    "messageMin": "Please write a longer message (at least 10 characters)",
+    "courseRequired": "Choose a course",
+    "slotRequired": "Pick at least one slot",
+    "ageRequired": "Choose age group"
+  },
+  "common": {
+    "viewMore": "View more",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again"
+  }
+}

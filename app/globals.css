@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@theme {
+  /* RLC brand palette — green from logo + gold from banner */
+  --color-cream: #FBF8F2;
+  --color-ivory: #F4ECDA;
+  --color-ink: #0F1B1D;
+  --color-ink-soft: #2A3739;
+  --color-rlc-900: #083922;
+  --color-rlc-800: #0E5132;
+  --color-rlc-700: #1A6F45;
+  --color-rlc-500: #2F9B62;
+  --color-rlc-100: #E6F0EA;
+  --color-gold: #C9A24A;
+  --color-gold-bright: #E0BC65;
+  --color-gold-soft: #E9D29C;
+  --color-rose: #B45C5C;
+  --color-line: rgba(15, 27, 29, 0.12);
+
+  /* Type */
+  --font-display-en: var(--font-fraunces);
+  --font-body-en: var(--font-inter);
+  --font-display-ar: var(--font-marhey);
+  --font-body-ar: var(--font-plex-arabic);
+
+  /* Motion */
+  --ease-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer base {
+  :root { color-scheme: light; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
+  html[lang='ar'] { --font-display: var(--font-display-ar); --font-body: var(--font-body-ar); }
+  html[lang='en'] { --font-display: var(--font-display-en); --font-body: var(--font-body-en); }
+  body {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'ss02';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  html[lang='ar'] body { font-weight: 500; }
+  ::selection { background: var(--color-gold); color: var(--color-ink); }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3, html[lang='ar'] h4 {
+    letter-spacing: 0;
+    line-height: 1.2;
+  }
+  *:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer utilities {
+  .display-xl { font-size: clamp(3rem, 7.5vw, 7rem); }
+  .display-lg { font-size: clamp(2.25rem, 4.5vw, 4.5rem); }
+  .display-md { font-size: clamp(1.75rem, 3vw, 2.75rem); }
+  .body-lg { font-size: 1.125rem; line-height: 1.65; }
+  .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-rlc-700);
+  }
+  html[lang='ar'] .eyebrow { letter-spacing: 0.04em; text-transform: none; }
+
+  .grain {
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.04; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>");
+  }
+  .hairline-gold {
+    background-image: linear-gradient(to right, transparent, var(--color-gold) 50%, transparent);
+    height: 1px;
+  }
+  .gradient-mesh {
+    background:
+      radial-gradient(at 20% 30%, rgba(201, 162, 74, 0.20) 0%, transparent 50%),
+      radial-gradient(at 80% 20%, rgba(14, 81, 50, 0.16) 0%, transparent 55%),
+      radial-gradient(at 70% 80%, rgba(201, 162, 74, 0.12) 0%, transparent 50%),
+      radial-gradient(at 30% 90%, rgba(26, 111, 69, 0.10) 0%, transparent 55%);
+  }
+
+  /* Gold sweep curve — echoes the RLC banner */
+  .gold-sweep {
+    position: absolute; inset: auto 0 -1px 0;
+    height: 60px; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 100%, var(--color-gold) 0%, transparent 70%);
+    opacity: 0.45; filter: blur(2px);
+  }
+
+  /* Hover lift card */
+  .card-lift {
+    transition: transform 400ms var(--ease-expo), box-shadow 400ms var(--ease-expo);
+    will-change: transform;
+  }
+  .card-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 60px -30px rgba(8, 57, 34, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
