@@ -27,7 +27,7 @@ export function WhyUs() {
       <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-6 md:grid-rows-3 md:gap-5 md:[grid-auto-flow:dense]">
         <Reveal className="md:col-span-3 md:row-span-2" delay={0.05}><FeatureTile item={items[0]} Icon={icons[0]} large /></Reveal>
         <Reveal className="md:col-span-3 md:row-span-2" delay={0.12}>
-          <ImageTile src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1200&q=80" label="curriculum" item={items[1]} Icon={icons[1]} />
+          <ImageTile src="/brand/classroom.jpg" label="curriculum" item={items[1]} />
         </Reveal>
         <Reveal className="md:col-span-2 md:row-span-1" delay={0.18}><FeatureTile item={items[2]} Icon={icons[2]} /></Reveal>
         <Reveal className="md:col-span-2 md:row-span-1" delay={0.24}><FeatureTile item={items[3]} Icon={icons[3]} /></Reveal>
@@ -49,17 +49,14 @@ function FeatureTile({ item, Icon, large = false }: { item: Item; Icon: React.Co
   );
 }
 
-function ImageTile({ src, label, item, Icon }: { src: string; label: string; item: Item; Icon: React.ComponentType<{ className?: string }> }) {
+function ImageTile({ src, label, item }: { src: string; label: string; item: Item }) {
   return (
     <div className="group relative h-full min-h-[260px] overflow-hidden rounded-sm bg-[var(--color-rlc-900)] ring-1 ring-[var(--color-line)]">
       <Image src={src} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw"
-        className="object-cover opacity-70 transition-transform duration-[1.8s] ease-out group-hover:scale-110" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rlc-900)]/90 via-[var(--color-rlc-900)]/40 to-transparent" />
+        className="object-cover opacity-80 transition-transform duration-[1.8s] ease-out group-hover:scale-110" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rlc-900)]/95 via-[var(--color-rlc-900)]/45 to-[var(--color-rlc-900)]/10" />
       <div className="absolute inset-x-8 bottom-8 text-[var(--color-cream)]">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-cream)]/15 backdrop-blur-sm">
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="mt-6 text-[0.7rem] uppercase tracking-[0.16em] opacity-70">{label}</div>
+        <div className="text-[0.7rem] uppercase tracking-[0.16em] opacity-70">{label}</div>
         <h3 className="mt-2 font-[var(--font-display)] text-2xl">{item.title}</h3>
         <p className="mt-2 max-w-md text-sm opacity-85">{item.body}</p>
       </div>

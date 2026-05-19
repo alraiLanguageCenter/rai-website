@@ -13,17 +13,26 @@ export function Logo({ className, withText = true, animated = false }: { classNa
     <>
       <motion.div
         initial={animated && !reduced ? { rotate: -20, scale: 0.8, opacity: 0 } : false}
-        animate={animated && !reduced ? { rotate: 0, scale: 1, opacity: 1 } : false}
-        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        animate={
+          animated && !reduced
+            ? { rotate: [0, -3, 3, 0], scale: [1, 1.04, 1, 1], opacity: 1 }
+            : false
+        }
+        transition={{
+          rotate: { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.4 },
+          scale: { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.4 },
+          opacity: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
+        }}
+        whileHover={reduced ? undefined : { rotate: 0, scale: 1.08 }}
         className="shrink-0"
       >
         <Image
           src="/brand/rlc-logo.jpg"
           alt="RLC"
-          width={56}
-          height={56}
+          width={96}
+          height={96}
           priority
-          className="h-12 w-12 rounded-sm object-contain"
+          className="h-16 w-16 object-contain mix-blend-multiply lg:h-[72px] lg:w-[72px]"
         />
       </motion.div>
       {withText && (

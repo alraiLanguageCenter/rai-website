@@ -29,15 +29,27 @@
       "Speak with confidence.",
       "Master the language.",
       "Open new doors.",
-      "Find your voice."
+      "Find your voice.",
+      "Express your ideas.",
+      "Travel the world."
     ],
     "greetings": [
-      { "en": "Hello!", "ar": "مرحباً!" },
-      { "en": "Welcome.", "ar": "أهلاً." },
-      { "en": "Nice to meet you.", "ar": "تشرّفنا." },
-      { "en": "Let's begin.", "ar": "لنبدأ." }
+      { "en": "Hello!",                "ar": "مرحباً!" },
+      { "en": "Welcome.",              "ar": "أهلاً." },
+      { "en": "Nice to meet you.",     "ar": "تشرّفنا." },
+      { "en": "Let's begin.",          "ar": "لنبدأ." },
+      { "en": "How are you?",          "ar": "كيف حالك؟" },
+      { "en": "Good morning!",         "ar": "صباح الخير!" },
+      { "en": "Speak with me.",        "ar": "تحدّث معي." },
+      { "en": "Yes, you can.",         "ar": "نعم، تستطيع." }
     ],
-    "floatingWords": ["Hello", "Speak", "Listen", "Read", "Write", "Confidence", "Fluency", "Welcome", "Conversation", "Discover"]
+    "floatingWords": [
+      "Hello",       "Speak",       "Listen",      "Read",         "Write",
+      "Confidence",  "Fluency",     "Welcome",     "Conversation", "Discover",
+      "Imagine",     "Curiosity",   "Practice",    "Vocabulary",   "Grammar",
+      "Storytelling","Pronounce",   "Express",     "Connect",      "Dream",
+      "Bonjour",     "Wonderful",   "Together",    "Believe",      "Grow"
+    ]
   },
   "brandStrip": {
     "learn": "Learn",
@@ -67,12 +79,15 @@
   },
   "courses": {
     "eyebrow": "Our courses",
-    "title": "Four paths. One goal: language mastery.",
+    "title": "Six paths. One goal: language mastery.",
+    "lede": "Whatever your age, level, or schedule — there's a Rai path designed for you.",
     "items": [
-      { "id": "kids", "title": "Kids & Teens", "tag": "Ages 7 – 17", "summary": "Programs designed to build fluency through fun and interaction.", "details": "We use educational games, stories, and group activities to build a strong language foundation and lasting love of learning. Small groups, similar age cohorts.", "cta": "Reserve a seat" },
-      { "id": "adults", "title": "Adult Conversation", "tag": "All levels", "summary": "From zero to fluent — a practical curriculum that puts conversation first.", "details": "We integrate all four skills with a special focus on real-world conversation: everyday situations, debates, and presentations. Morning and evening groups.", "cta": "Get started" },
-      { "id": "exams", "title": "TOEFL & IELTS Prep", "tag": "International exams", "summary": "Intensive training and weekly reviews with full mock exams.", "details": "We cover all four sections with specialized strategies. Detailed performance analysis and training to manage time and pressure on exam day.", "cta": "Start preparing" },
-      { "id": "business", "title": "Business English", "tag": "For professionals", "summary": "Professional workplace language: correspondence, presentations, negotiation, and meetings.", "details": "Content designed for the demands of modern work: writing emails and reports, presenting, and the vocabulary of your industry. Private or group sessions.", "cta": "Level up" }
+      { "id": "kids",      "title": "Kids & Teens",         "tag": "Ages 7 – 17",        "badge": "Loved by parents", "summary": "Programs designed to build fluency through fun and interaction.",                  "details": "We use educational games, stories, and group activities to build a strong language foundation and a lasting love of learning. Small groups, similar age cohorts.", "cta": "Reserve a seat" },
+      { "id": "adults",    "title": "Adult Conversation",   "tag": "All levels",         "badge": "Most popular",     "summary": "From zero to fluent — a practical curriculum that puts conversation first.",      "details": "We integrate all four skills with a special focus on real-world conversation: everyday situations, debates, and presentations. Morning and evening groups.",       "cta": "Get started" },
+      { "id": "exams",     "title": "TOEFL & IELTS Prep",   "tag": "International exams","badge": "High scores",      "summary": "Intensive training and weekly reviews with full mock exams.",                     "details": "We cover all four sections with specialized strategies. Detailed performance analysis and training to manage time and pressure on exam day.",                      "cta": "Start preparing" },
+      { "id": "business",  "title": "Business English",     "tag": "For professionals",  "badge": "Career boost",     "summary": "Workplace language: correspondence, presentations, negotiation, and meetings.",   "details": "Content designed for the demands of modern work: writing emails and reports, presenting, and the vocabulary of your industry. Private or group sessions.",         "cta": "Level up" },
+      { "id": "private",   "title": "Private 1-on-1",       "tag": "Fully bespoke",      "badge": "Fastest progress", "summary": "Your own instructor, your pace, your goal. The most personal path to fluency.",    "details": "A dedicated instructor matched to your goal — exam prep, accent coaching, interview practice, or just confidence. Flexible scheduling around your life.",          "cta": "Reserve your tutor" },
+      { "id": "online",    "title": "Online Live Classes",  "tag": "From anywhere",      "badge": "New",              "summary": "The same Rai experience — live, interactive, small group — from your screen.",    "details": "Live HD video classes with the same instructors and the same curriculum. Designed for students abroad and busy professionals.",                                     "cta": "Join online" }
     ]
   },
   "schedule": {

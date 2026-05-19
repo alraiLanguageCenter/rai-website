@@ -158,25 +158,9 @@ export function Hero() {
           />
         ))}
 
-      {/* Layer 9: Greeting bubbles (right side, desktop only) */}
-      <div className="pointer-events-none absolute end-8 top-1/2 hidden -translate-y-1/2 select-none lg:block">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={greetIdx}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.92 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col items-end gap-3"
-          >
-            <SpeechBubble side="right" tone="green">
-              {greetings[greetIdx].en}
-            </SpeechBubble>
-            <SpeechBubble side="right" tone="gold" delay={0.25}>
-              {greetings[greetIdx].ar}
-            </SpeechBubble>
-          </motion.div>
-        </AnimatePresence>
+      {/* Layer 9: Scattered greeting bubbles — three bubbles at randomized right-half positions per cycle */}
+      <div className="pointer-events-none absolute inset-0 hidden select-none lg:block">
+        <ScatteredBubbles greetings={greetings} cycle={greetIdx} />
       </div>
 
       {/* Main content */}
@@ -282,17 +266,25 @@ export function Hero() {
 /* -------------------------- Sub-components -------------------------- */
 
 function FloatingWords({ words }: { words: string[] }) {
-  // 10 fixed positions across the viewport, each word gets one
-  const placements = words.map((_, i) => ({
-    // Spread evenly using hashed-feeling positions
-    top: `${5 + ((i * 41) % 90)}%`,
-    left: `${4 + ((i * 67) % 92)}%`,
-    delay: i * 0.4,
-    duration: 9 + (i % 4),
-    depth: 0.3 + ((i % 3) * 0.25),
-    fontSize: 0.75 + ((i * 13) % 7) * 0.08,
-    rotate: ((i * 11) % 11) - 5,
-  }));
+  // Each word gets unique deterministic-but-feels-random properties
+  const placements = words.map((_, i) => {
+    // Deterministic pseudo-random from index — feels organic, stable between renders
+    const r1 = ((i * 2654435761) % 1000) / 1000;
+    const r2 = ((i * 1597334677) % 1000) / 1000;
+    const r3 = ((i * 374761393)  % 1000) / 1000;
+    const r4 = ((i * 911) % 1000) / 1000;
+    return {
+      top:    `${4 + r1 * 92}%`,
+      left:   `${3 + r2 * 94}%`,
+      delay:  r3 * 8,
+      duration: 7 + r4 * 7,
+      depth:  0.25 + r1 * 0.7,
+      fontSize: 0.7 + r2 * 1.1,
+      rotate: r3 * 14 - 7,
+      italic: r4 > 0.5,
+      goldTint: r1 > 0.78,
+    };
+  });
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -301,17 +293,18 @@ function FloatingWords({ words }: { words: string[] }) {
         return (
           <motion.span
             key={`${w}-${i}`}
-            className="absolute select-none font-[var(--font-display)] italic text-[var(--color-rlc-800)]/30"
+            className={`absolute select-none font-[var(--font-display)] ${p.italic ? 'italic' : ''} ${p.goldTint ? 'text-[var(--color-gold)]/55' : 'text-[var(--color-rlc-800)]/35'}`}
             style={{
               top: p.top,
               left: p.left,
               fontSize: `${p.fontSize}rem`,
-              filter: `blur(${(1 - p.depth) * 1.2}px)`,
+              filter: `blur(${(1 - p.depth) * 1.4}px)`,
+              letterSpacing: p.italic ? '-0.01em' : '0.01em',
             }}
             initial={{ opacity: 0, y: 30, rotate: p.rotate }}
             animate={{
-              opacity: [0, p.depth * 0.7, 0],
-              y: [30, -30, -50],
+              opacity: [0, p.depth * 0.8, 0],
+              y: [30, -30, -55],
               rotate: [p.rotate, p.rotate + 2, p.rotate - 1],
             }}
             transition={{
@@ -326,6 +319,62 @@ function FloatingWords({ words }: { words: string[] }) {
         );
       })}
     </div>
+  );
+}
+
+/**
+ * Three small speech bubbles placed at randomised positions across the right half
+ * of the hero. They re-place themselves each cycle so the screen never feels static.
+ */
+function ScatteredBubbles({
+  greetings,
+  cycle,
+}: {
+  greetings: { en: string; ar: string }[];
+  cycle: number;
+}) {
+  // Three bubbles per cycle drawn from the greetings pool starting at `cycle`
+  const picks = [0, 1, 2].map((k) => greetings[(cycle + k) % greetings.length]);
+  // Anchor positions (right-half area): each cycle rotates through 3 layouts
+  const LAYOUTS: { top: string; right: string; tone: 'green' | 'gold'; lang: 'en' | 'ar'; delay: number }[][] = [
+    [
+      { top: '14%', right: '6%',  tone: 'green', lang: 'en', delay: 0 },
+      { top: '38%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0.2 },
+      { top: '68%', right: '4%',  tone: 'green', lang: 'en', delay: 0.4 },
+    ],
+    [
+      { top: '10%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0 },
+      { top: '46%', right: '4%',  tone: 'green', lang: 'en', delay: 0.2 },
+      { top: '74%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0.4 },
+    ],
+    [
+      { top: '22%', right: '4%',  tone: 'green', lang: 'en', delay: 0 },
+      { top: '50%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0.2 },
+      { top: '78%', right: '6%',  tone: 'green', lang: 'en', delay: 0.4 },
+    ],
+  ];
+  const layout = LAYOUTS[cycle % LAYOUTS.length];
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div key={cycle} className="absolute inset-0">
+        {layout.map((spot, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 14, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.7, delay: spot.delay, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute"
+            style={{ top: spot.top, right: spot.right }}
+          >
+            <SpeechBubble side="right" tone={spot.tone}>
+              {spot.lang === 'en' ? picks[i].en : picks[i].ar}
+            </SpeechBubble>
+          </motion.div>
+        ))}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
