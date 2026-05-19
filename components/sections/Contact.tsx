@@ -11,6 +11,7 @@ import { Reveal } from '@/components/motion/Reveal';
 import { Section } from '@/components/ui/Section';
 import { Button } from '@/components/ui/Button';
 import { SITE } from '@/lib/site';
+import { formatDigits } from '@/lib/utils';
 
 export function Contact() {
   const t = useTranslations('contact');
@@ -58,7 +59,7 @@ export function Contact() {
               </InfoRow>
               <InfoRow icon={Phone} title={t('info.phoneTitle')}>
                 {SITE.contact.phones.map((p) => (
-                  <a key={p} href={`tel:${p.replace(/\s/g, '')}`} className="block hover:text-[var(--color-rlc-800)]" dir="ltr">{p}</a>
+                  <a key={p} href={`tel:${p.replace(/\s/g, '')}`} className="block hover:text-[var(--color-rlc-800)]" dir="ltr">{formatDigits(p, locale)}</a>
                 ))}
               </InfoRow>
               <InfoRow icon={Mail} title={t('info.emailTitle')}>

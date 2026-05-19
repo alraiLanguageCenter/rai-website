@@ -5,6 +5,7 @@ import { Facebook, Instagram, Youtube, MessageCircle, Users } from 'lucide-react
 import { motion, useReducedMotion } from 'framer-motion';
 import { Logo } from '@/components/ui/Logo';
 import { SITE } from '@/lib/site';
+import { formatDigits } from '@/lib/utils';
 
 const SOCIAL = [
   { href: SITE.social.facebookPage, label: 'Facebook', Icon: Facebook },
@@ -113,10 +114,20 @@ export function Footer() {
             </div>
           </div>
           <div className="lg:col-span-3">
-            <div className="text-[0.7rem] uppercase tracking-[0.16em] opacity-70">{locale === 'ar' ? 'تواصل' : 'Get in touch'}</div>
+            <div className="text-[0.7rem] uppercase tracking-[0.16em] opacity-70">{locale === 'ar' ? 'تواصل معنا' : 'Get in touch'}</div>
             <div className="mt-3 space-y-1 text-sm">
               {SITE.contact.phones.map((p) => (
-                <a key={p} href={`tel:${p.replace(/\s/g, '')}`} className="block opacity-90 hover:text-[var(--color-gold)]" dir="ltr">{p}</a>
+                <a
+                  key={p}
+                  href={`tel:${p.replace(/\s/g, '')}`}
+                  /* dir is LTR in English so the +XXX prefix reads left-to-right;
+                     in Arabic we keep LTR for the underlying tel URI but the
+                     visible digits are converted to Arabic-Indic. */
+                  dir="ltr"
+                  className="block opacity-90 hover:text-[var(--color-gold)]"
+                >
+                  {formatDigits(p, locale)}
+                </a>
               ))}
               <a href={`mailto:${SITE.contact.email}`} className="block opacity-90 hover:text-[var(--color-gold)]" dir="ltr">{SITE.contact.email}</a>
             </div>

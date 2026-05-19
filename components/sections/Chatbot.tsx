@@ -7,7 +7,7 @@ import { MessageCircle, X, Send, Sparkles, BookOpen, Calendar, Compass, ArrowRig
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
-const AVATAR_SRC = '/brand/nouha-portrait.jpg';
+const AVATAR_SRC = '/brand/chatbot-character.png';
 
 export function Chatbot() {
   const locale = useLocale() as 'ar' | 'en';
@@ -86,7 +86,7 @@ export function Chatbot() {
         setMessages((prev) => [...prev, {
           role: 'assistant',
           content: locale === 'ar'
-            ? 'تعذّر الوصول للخادم. حاول مرة أخرى بعد قليل أو تواصل معنا على +963 17 2566699.'
+            ? 'تعذّر الوصول للخادم. حاول مرة أخرى بعد قليل أو تواصل معنا على +٩٦٣ ١٧ ٢٥٦٦٦٩٩.'
             : "I couldn't reach the server. Please try again in a moment or call us at +963 17 2566699.",
         }]);
       }
