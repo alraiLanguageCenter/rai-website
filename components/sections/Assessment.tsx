@@ -130,6 +130,35 @@ export function Assessment() {
     setStage('mcq');
   }
 
+  /**
+   * The chatbot (or any other widget) can fire `rai:start-assessment` to
+   * jump straight into the placement test. We only honour it if questions
+   * have already loaded — otherwise the call would silently no-op. The
+   * handler waits for questions to be ready and then fires `start()` once.
+   */
+  const startPendingRef = useRef(false);
+  useEffect(() => {
+    function onStartRequest() {
+      if (questions && questions.length > 0) {
+        start();
+      } else {
+        startPendingRef.current = true;
+      }
+    }
+    window.addEventListener('rai:start-assessment', onStartRequest);
+    return () => window.removeEventListener('rai:start-assessment', onStartRequest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
+  // If a start was requested before the questions arrived, kick it off now.
+  useEffect(() => {
+    if (startPendingRef.current && questions && questions.length > 0) {
+      startPendingRef.current = false;
+      start();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
   function answerMcq(opt: number) {
     if (!questions) return;
     const next = [...answers]; next[idx] = opt;

@@ -3,7 +3,7 @@
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations, useLocale } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, Plus, Trash2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { bookingSchema, type BookingInput } from '@/lib/validators/booking';
@@ -18,13 +18,37 @@ export function Booking() {
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<BookingInput>({
+  const { register, handleSubmit, control, reset, setValue, formState: { errors } } = useForm<BookingInput>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       locale, website: '', name: '', email: '', phone: '', ageGroup: undefined,
       preferredSlots: [''] as unknown as string[], notes: '',
     },
   });
+
+  /**
+   * The chatbot (or any other widget) can fire `rai:prefill-booking` with
+   * { name?, email?, phone?, ageGroup? } to populate the form. We use
+   * setValue + a flash highlight so the user immediately sees their info
+   * appear and can finish the rest.
+   */
+  useEffect(() => {
+    function onPrefill(e: Event) {
+      const ce = e as CustomEvent<{ name?: string; email?: string; phone?: string; ageGroup?: 'child' | 'teen' | 'adult' | 'professional' }>;
+      const d = ce.detail ?? {};
+      if (d.name) setValue('name', d.name, { shouldDirty: true });
+      if (d.email) setValue('email', d.email, { shouldDirty: true });
+      if (d.phone) setValue('phone', d.phone, { shouldDirty: true });
+      if (d.ageGroup) setValue('ageGroup', d.ageGroup, { shouldDirty: true });
+      toast.success(
+        locale === 'ar'
+          ? 'تمّ تعبئة بياناتك. أكمل اختيار الموعد ثمّ اضغط إرسال.'
+          : 'Your details have been filled in. Pick a slot and hit send.',
+      );
+    }
+    window.addEventListener('rai:prefill-booking', onPrefill as EventListener);
+    return () => window.removeEventListener('rai:prefill-booking', onPrefill as EventListener);
+  }, [setValue, locale]);
   const { fields, append, remove } = useFieldArray({
     control, name: 'preferredSlots' as never,
   });

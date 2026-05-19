@@ -69,11 +69,28 @@ export function Announcements() {
   if (items !== null && items.length === 0) return null;
 
   return (
-    <Section id="announcements" tone="rlc" bleed className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
-      {/* Drifting ambient blobs */}
+    <Section id="announcements" tone="ivory" bleed className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
+      {/* Layered backdrop:
+           - A soft cream→ivory→cream vertical gradient gives the section more
+             warmth than the flat rlc-100 it had before.
+           - A subtle dotted texture grid adds quiet pattern without competing
+             with the headline.
+           - Two drifting gold/green blobs maintain the ambient motion.
+           - A gold-tipped hairline along the top edge anchors the section. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-cream)] via-[var(--color-ivory)] to-[var(--color-cream)]" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(8,57,34,0.35) 1px, transparent 1.5px)',
+            backgroundSize: '22px 22px',
+          }}
+        />
+        <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-gold)]/60 to-transparent" />
+      </div>
       {!reduced && (
         <>
-          <motion.span aria-hidden className="pointer-events-none absolute -end-20 -top-20 h-72 w-72 rounded-full bg-[var(--color-gold)]/15 blur-3xl"
+          <motion.span aria-hidden className="pointer-events-none absolute -end-20 -top-20 h-72 w-72 rounded-full bg-[var(--color-gold)]/20 blur-3xl"
             animate={{ y: [0, 18, 0], x: [0, -10, 0] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }} />
           <motion.span aria-hidden className="pointer-events-none absolute -start-24 bottom-0 h-80 w-80 rounded-full bg-[var(--color-rlc-700)]/15 blur-3xl"
             animate={{ y: [0, -20, 0], x: [0, 12, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
@@ -160,7 +177,10 @@ function AnnouncementCard({
       whileHover={reduced ? undefined : { y: -6, scale: 1.01 }}
       className="group relative flex h-full flex-col overflow-hidden rounded-md bg-[var(--color-cream)] ring-1 ring-[var(--color-line)] shadow-[0_18px_40px_-24px_rgba(8,57,34,0.35)] transition-shadow hover:shadow-[0_28px_60px_-20px_rgba(8,57,34,0.45)]"
     >
-      {/* Top media — small thumbnail or placeholder */}
+      {/* Top media — small thumbnail or layered placeholder.
+          The placeholder is now a quiet, layered composition: radial gold glow
+          on the corner, a centred ✦ glyph, and three small twinkling sparkles
+          for life. Looks intentional, not "image missing". */}
       <div className="relative h-32 overflow-hidden bg-gradient-to-br from-[var(--color-rlc-800)] via-[var(--color-rlc-700)] to-[var(--color-rlc-900)] sm:h-36">
         {item.flyer_url ? (
           <img
@@ -170,13 +190,30 @@ function AnnouncementCard({
           />
         ) : (
           <div className="absolute inset-0">
-            {/* Decorative starburst / sparkle */}
-            <Sparkles className="absolute end-4 top-4 h-5 w-5 text-[var(--color-gold)]/70" />
-            <div className="absolute inset-0 grid place-items-center font-[var(--font-display)] text-[6rem] leading-none text-[var(--color-gold)]/20 sm:text-[7rem]">✦</div>
+            {/* Soft gold corner glow */}
+            <span aria-hidden className="absolute -end-8 -top-8 h-28 w-28 rounded-full bg-[var(--color-gold)]/25 blur-2xl" />
+            <span aria-hidden className="absolute -start-10 -bottom-8 h-24 w-24 rounded-full bg-[var(--color-rlc-700)]/40 blur-2xl" />
+            {/* Centred glyph */}
+            <div className="absolute inset-0 grid place-items-center font-[var(--font-display)] text-[5rem] leading-none text-[var(--color-gold)]/25 sm:text-[6rem]">✦</div>
+            {/* Three twinkling sparkles */}
+            {!reduced && [
+              { top: '18%', start: '20%', d: 2.6, dl: 0 },
+              { top: '70%', start: '78%', d: 3.0, dl: 0.6 },
+              { top: '38%', start: '70%', d: 3.4, dl: 1.2 },
+            ].map((s, i) => (
+              <motion.span
+                key={i}
+                aria-hidden
+                className="absolute h-1 w-1 rounded-full bg-[var(--color-gold)]"
+                style={{ top: s.top, insetInlineStart: s.start, opacity: 0.5 }}
+                animate={{ scale: [0.8, 1.6, 0.8], opacity: [0.25, 0.9, 0.25] }}
+                transition={{ duration: s.d, repeat: Infinity, delay: s.dl, ease: 'easeInOut' }}
+              />
+            ))}
           </div>
         )}
         {/* Dark gradient + gold sweep over media */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rlc-900)]/85 via-[var(--color-rlc-900)]/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rlc-900)]/80 via-[var(--color-rlc-900)]/25 to-transparent" />
         {!reduced && (
           <motion.span
             aria-hidden

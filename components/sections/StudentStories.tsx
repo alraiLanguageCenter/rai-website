@@ -122,27 +122,28 @@ export function StudentStories() {
         </div>
       </div>
 
-      {/* The attractive trigger */}
-      <div className="relative mx-auto mt-14 flex w-full max-w-7xl justify-center px-6">
-        <BigTrigger
-          label={triggerLabel}
-          countWins={WINS.length}
-          countVoices={testimonials.length}
-          locale={locale}
+      {/* Carousel controls + a quiet "see all" link (replaces the loud trigger bar).
+          One small text button at the end of the row keeps the archive reachable
+          without a chunky CTA fighting with the section above and below. */}
+      <div className="relative mx-auto mt-8 flex w-full max-w-7xl items-center justify-between gap-3 px-6 lg:px-10">
+        <button
           onClick={() => setOpen(true)}
-        />
-      </div>
-
-      {/* Carousel arrows */}
-      <div className="relative mx-auto mt-8 flex w-full max-w-7xl items-center justify-end gap-3 px-6 lg:px-10">
-        <button onClick={() => emblaApi?.scrollPrev()} aria-label="Previous"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-[var(--color-cream)]/30 text-[var(--color-cream)] transition hover:bg-[var(--color-cream)]/10">
-          <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+          className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-gold)] transition hover:text-[var(--color-gold-bright)]"
+        >
+          <span className="h-px w-8 bg-[var(--color-gold)]/60 transition-all group-hover:w-12" />
+          {triggerLabel}
+          <span aria-hidden className="transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5">→</span>
         </button>
-        <button onClick={() => emblaApi?.scrollNext()} aria-label="Next"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-[var(--color-cream)]/30 text-[var(--color-cream)] transition hover:bg-[var(--color-cream)]/10">
-          <ChevronRight className="h-4 w-4 rtl:rotate-180" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => emblaApi?.scrollPrev()} aria-label="Previous"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-[var(--color-cream)]/30 text-[var(--color-cream)] transition hover:bg-[var(--color-cream)]/10">
+            <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+          </button>
+          <button onClick={() => emblaApi?.scrollNext()} aria-label="Next"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-[var(--color-cream)]/30 text-[var(--color-cream)] transition hover:bg-[var(--color-cream)]/10">
+            <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -225,19 +226,19 @@ function StoriesBackdrop({ reduced }: { reduced: boolean }) {
         </>
       )}
 
-      {/* Particles */}
+      {/* Particles — kept to a quiet 8 (was 18) so the section reads calmer. */}
       {!reduced &&
-        Array.from({ length: 18 }).map((_, i) => (
+        Array.from({ length: 8 }).map((_, i) => (
           <motion.span
             key={i}
             className="absolute h-1 w-1 rounded-full bg-[var(--color-gold)]"
             style={{
               top: `${(i * 53) % 100}%`,
               left: `${(i * 41) % 100}%`,
-              opacity: 0.55,
+              opacity: 0.45,
             }}
-            animate={{ y: [0, -18, 0], opacity: [0.2, 0.8, 0.2], scale: [1, 1.4, 1] }}
-            transition={{ duration: 4 + (i % 5), delay: i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+            animate={{ y: [0, -12, 0], opacity: [0.15, 0.5, 0.15] }}
+            transition={{ duration: 5 + (i % 4), delay: i * 0.3, repeat: Infinity, ease: 'easeInOut' }}
           />
         ))}
     </div>

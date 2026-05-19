@@ -3,9 +3,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { MessageCircle, X, Send, Sparkles, BookOpen, Calendar, Compass, ArrowRight } from 'lucide-react';
+import {
+  MessageCircle, X, Send, Sparkles, BookOpen, Calendar, Compass, ArrowRight,
+  CalendarPlus, GraduationCap,
+} from 'lucide-react';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+
+/**
+ * Conversational mode. 'chat' is normal Q&A through the LLM; the booking-*
+ * states form a guided form-collection flow where each user message is
+ * captured into the draft, the form on the page is pre-filled at the end,
+ * and the user is gently handed off to finish (slot + send).
+ */
+type Mode = 'chat' | 'booking-name' | 'booking-email' | 'booking-phone';
+
+type BookingDraft = { name?: string; email?: string; phone?: string };
 
 const AVATAR_SRC = '/brand/chatbot-character.png';
 
@@ -16,6 +29,8 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<Mode>('chat');
+  const [bookingDraft, setBookingDraft] = useState<BookingDraft>({});
   // Show the "Let me help you" floating call-out once after the page loads so
   // visitors discover the chat — and dismiss it once they've opened it.
   const [showCallout, setShowCallout] = useState(false);
@@ -36,8 +51,8 @@ export function Chatbot() {
           role: 'assistant',
           content:
             locale === 'ar'
-              ? "مرحباً! أنا نهى، المساعدة الذكية لمركز الراعي للغات. يمكنني أن أساعدك في:\n\n• معلومات عن الدورات (إنجليزي، فرنسي، ألماني، روسي وأكثر)\n• مواعيد الدورات وأوقات الامتحانات\n• الأسعار، طرق التسجيل، والمواقع\n• حجز اختبار تحديد مستوى مجاني\n\nما الذي تبحث عنه اليوم؟ 😊"
-              : "Hi! I'm Nouha, the AI assistant for Rai Language Center. I can help you with:\n\n• Course info (English, French, German, Russian & more)\n• Class schedules and exam dates\n• Pricing, registration, and locations\n• Booking a free placement test\n\nWhat would you like to know? 😊",
+              ? "مرحباً! أنا نهى، المساعدة الذكية لمركز الراعي للغات.\n\nيمكنني أن أساعدك مباشرة في:\n• حجز جلسة تقييم — سأملأ النموذج عنك\n• بدء اختبار تحديد المستوى الآن\n• معلومات عن الدورات والمواعيد والأسعار\n\nاختر إجراءً سريعاً من الأسفل أو اكتب سؤالك. 😊"
+              : "Hi! I'm Nouha, the AI assistant for Rai Language Center.\n\nI can help you directly with:\n• Booking an assessment — I'll fill the form for you\n• Starting the AI placement test right now\n• Course info, schedules, and pricing\n\nPick a quick action below or type your question. 😊",
         },
       ]);
     }
@@ -48,9 +63,148 @@ export function Chatbot() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, sending]);
 
+  /* -------------------- helpers -------------------- */
+
+  function pushAssistant(content: string) {
+    setMessages((m) => [...m, { role: 'assistant', content }]);
+  }
+
+  /** Scroll smoothly to a section by id, with header offset. */
+  function scrollToSection(id: string) {
+    const el = typeof document !== 'undefined' ? document.getElementById(id) : null;
+    if (!el) {
+      if (typeof window !== 'undefined') window.location.hash = id;
+      return;
+    }
+    const top = el.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  function isLikelyEmail(s: string) { return /.+@.+\..+/.test(s.trim()); }
+  function isLikelyPhone(s: string) { return /[+0-9٠-٩][\d\s+\-()٠-٩]{6,}/.test(s.trim()); }
+
+  /* -------------------- guided flows -------------------- */
+
+  /** Begin the "book assessment" guided flow: collect name → email → phone, then prefill the form. */
+  function startBookingFlow() {
+    scrollToSection('book');
+    setMode('booking-name');
+    setBookingDraft({});
+    setMessages((m) => [
+      ...m,
+      { role: 'user', content: locale === 'ar' ? 'أريد حجز جلسة تقييم' : 'I want to book an assessment' },
+      {
+        role: 'assistant',
+        content: locale === 'ar'
+          ? 'رائع — سأملأ نموذج الحجز معك خطوة بخطوة. ما اسمك الكامل؟'
+          : "Great — I'll fill the booking form with you step by step. What's your full name?",
+      },
+    ]);
+  }
+
+  /** Kick off the AI placement test now: scroll + dispatch event + acknowledge. */
+  function startAssessmentNow() {
+    scrollToSection('assess');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('rai:start-assessment'));
+    }
+    setMessages((m) => [
+      ...m,
+      { role: 'user', content: locale === 'ar' ? 'ابدأ اختبار تحديد المستوى الآن' : 'Start the placement test now' },
+      {
+        role: 'assistant',
+        content: locale === 'ar'
+          ? 'يبدأ اختبارك الآن — حظاً موفقاً! أنا هنا إن احتجت أي مساعدة. 🍀'
+          : "Your test is starting now — best of luck! I'm here if you need anything. 🍀",
+      },
+    ]);
+    // Politely close the chat panel a moment later so the user can focus on
+    // the assessment without the chat covering it.
+    setTimeout(() => setOpen(false), 1400);
+  }
+
+  /** Handle a user message while inside a guided booking flow. */
+  function handleBookingStep(userText: string) {
+    setMessages((m) => [...m, { role: 'user', content: userText }]);
+
+    if (mode === 'booking-name') {
+      const name = userText.trim();
+      setBookingDraft((d) => ({ ...d, name }));
+      setMode('booking-email');
+      pushAssistant(locale === 'ar'
+        ? `شكراً ${name} 🌿 ما هو بريدك الإلكتروني؟`
+        : `Thanks ${name} 🌿 What's your email address?`);
+      return;
+    }
+
+    if (mode === 'booking-email') {
+      if (!isLikelyEmail(userText)) {
+        pushAssistant(locale === 'ar'
+          ? 'هذا لا يبدو بريداً إلكترونياً صحيحاً. حاول مرة أخرى من فضلك — مثل name@example.com'
+          : "That doesn't look like a valid email. Could you try again? e.g. name@example.com");
+        return;
+      }
+      const email = userText.trim();
+      setBookingDraft((d) => ({ ...d, email }));
+      setMode('booking-phone');
+      pushAssistant(locale === 'ar'
+        ? 'ممتاز. وما رقم الواتساب لديك (مع رمز الدولة)؟'
+        : "Perfect. And your WhatsApp number (with country code)?");
+      return;
+    }
+
+    if (mode === 'booking-phone') {
+      if (!isLikelyPhone(userText)) {
+        pushAssistant(locale === 'ar'
+          ? 'الرقم لا يبدو صحيحاً. حاول بصيغة مثل +963 966 466699'
+          : "That doesn't look like a valid phone. Try something like +963 966 466699.");
+        return;
+      }
+      const phone = userText.trim();
+      const draft = { ...bookingDraft, phone };
+      setBookingDraft(draft);
+      setMode('chat');
+      // Dispatch the prefill event — Booking.tsx listens and populates the form.
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('rai:prefill-booking', { detail: draft }));
+      }
+      scrollToSection('book');
+      pushAssistant(locale === 'ar'
+        ? `تمّ! ملأتُ نموذج الحجز ببياناتك:\n• الاسم: ${draft.name}\n• البريد: ${draft.email}\n• الهاتف: ${draft.phone}\n\nاختر الفئة العمرية وموعداً مفضّلاً ثم اضغط "أرسل". سيتواصل معك الفريق قريباً 💚`
+        : `Done! I've filled the booking form with your info:\n• Name: ${draft.name}\n• Email: ${draft.email}\n• Phone: ${draft.phone}\n\nPick an age group and a preferred slot, then hit "Send". Our team will reach out shortly 💚`);
+      return;
+    }
+  }
+
+  /* -------------------- main send -------------------- */
+
   async function sendText(rawText?: string) {
     const text = (rawText ?? input).trim();
     if (!text || sending) return;
+
+    // 1) If we're inside the guided booking flow, capture locally.
+    if (mode !== 'chat') {
+      setInput('');
+      handleBookingStep(text);
+      return;
+    }
+
+    // 2) Simple intent detection: a free-form "I want to book" / "احجز" /
+    //    "start assessment" / "ابدأ التقييم" should trigger the right action
+    //    rather than going to the LLM.
+    const lower = text.toLowerCase();
+    if (/\bbook\b|\bassessment\b|\breserve\b|\bsign\s*up\b|احجز|حجز|تقييم|سجّل|سجل/i.test(lower) && !/^how|^when|^where|^كيف|^متى|^أين/.test(lower)) {
+      setInput('');
+      startBookingFlow();
+      return;
+    }
+    if (/start.*placement|start.*test|begin.*test|placement test|level test|ابدأ.*اختبار|اختبار المستوى|تحديد المستوى/i.test(lower)) {
+      setInput('');
+      startAssessmentNow();
+      return;
+    }
+
+    // 3) Otherwise, normal LLM chat.
     const next: Msg[] = [...messages, { role: 'user', content: text }];
     setMessages(next);
     setInput('');
@@ -77,9 +231,6 @@ export function Chatbot() {
       }
 
       const json = (await res.json().catch(() => null)) as { reply?: string } | null;
-      // The server always returns 200 with a `{ reply }` body — even when the
-      // upstream LLM is down, the route ships a friendly fallback. So we treat
-      // anything OK + a non-empty reply as a successful exchange.
       if (res.ok && json?.reply) {
         setMessages((prev) => [...prev, { role: 'assistant', content: json.reply! }]);
       } else {
@@ -103,22 +254,42 @@ export function Chatbot() {
     }
   }
 
-  // Pre-baked suggestion chips. Visible until the first user message.
+  /* -------------------- chips -------------------- */
+
+  // Two primary actions — these *do* something on the website, they don't
+  // just ask Nouha a question.
+  const actions: { label: string; sublabel: string; Icon: React.ComponentType<{ className?: string }>; onClick: () => void }[] = locale === 'ar'
+    ? [
+        { label: 'احجز جلسة تقييم', sublabel: 'سأملأ النموذج معك', Icon: CalendarPlus, onClick: startBookingFlow },
+        { label: 'ابدأ اختبار المستوى', sublabel: 'الاختبار يبدأ فوراً', Icon: GraduationCap, onClick: startAssessmentNow },
+      ]
+    : [
+        { label: 'Book an assessment', sublabel: "I'll fill the form for you", Icon: CalendarPlus, onClick: startBookingFlow },
+        { label: 'Start placement test', sublabel: 'Begins right away', Icon: GraduationCap, onClick: startAssessmentNow },
+      ];
+
+  // Pre-baked LLM-question chips. Visible until the first user message.
   const suggestions: { label: string; question: string; Icon: React.ComponentType<{ className?: string }> }[] = locale === 'ar'
     ? [
         { label: 'الدورات', question: 'ما الدورات المتوفرة؟', Icon: BookOpen },
         { label: 'المواعيد', question: 'ما مواعيد الدورات؟', Icon: Calendar },
-        { label: 'تحديد المستوى', question: 'كيف أحجز اختبار تحديد المستوى المجاني؟', Icon: Sparkles },
-        { label: 'الموقع والاتصال', question: 'أين المركز وكيف أتواصل؟', Icon: Compass },
+        { label: 'الأسعار', question: 'كيف تتم معرفة الأسعار وطريقة الدفع؟', Icon: Sparkles },
+        { label: 'الموقع', question: 'أين المركز وكيف أتواصل؟', Icon: Compass },
       ]
     : [
         { label: 'Browse courses', question: 'What courses do you offer?', Icon: BookOpen },
         { label: 'Class schedule', question: 'When are the upcoming classes?', Icon: Calendar },
-        { label: 'Free placement test', question: 'How do I book the free placement test?', Icon: Sparkles },
-        { label: 'Location & contact', question: 'Where are you located and how do I contact you?', Icon: Compass },
+        { label: 'Pricing', question: 'How do prices and payment work?', Icon: Sparkles },
+        { label: 'Location', question: 'Where are you located?', Icon: Compass },
       ];
 
-  const showSuggestions = messages.length <= 1 && !sending;
+  const showSuggestions = messages.length <= 1 && !sending && mode === 'chat';
+
+  // Placeholder text adapts to the guided-flow step.
+  const placeholder = mode === 'booking-name' ? (locale === 'ar' ? 'اكتب اسمك الكامل…' : 'Type your full name…')
+    : mode === 'booking-email' ? (locale === 'ar' ? 'اكتب بريدك الإلكتروني…' : 'Type your email…')
+    : mode === 'booking-phone' ? (locale === 'ar' ? 'اكتب رقم الواتساب…' : 'Type your WhatsApp number…')
+    : (locale === 'ar' ? 'اكتب رسالة...' : 'Type a message…');
 
   return (
     <>
@@ -243,7 +414,9 @@ export function Chatbot() {
                   <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-emerald-300">
                     <span className="absolute inset-0 animate-ping rounded-full bg-emerald-300/70" />
                   </span>
-                  {locale === 'ar' ? 'متاحة الآن' : 'Online now'}
+                  {mode === 'chat'
+                    ? (locale === 'ar' ? 'متاحة الآن' : 'Online now')
+                    : (locale === 'ar' ? 'تعبئة نموذج الحجز' : 'Filling booking form')}
                 </div>
               </div>
               <button
@@ -301,33 +474,73 @@ export function Chatbot() {
                   </div>
                 )}
 
-                {/* Suggestion chips — only before first user message */}
+                {/* Action + suggestion chips — only before first user message and only outside guided mode */}
                 {showSuggestions && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.3 }}
-                    className="mt-1 grid gap-2 sm:grid-cols-2"
+                    className="mt-1 grid gap-2"
                   >
-                    {suggestions.map((s, i) => (
-                      <motion.button
-                        key={s.label}
-                        onClick={() => sendText(s.question)}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 + i * 0.07, duration: 0.35 }}
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="group inline-flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-3 py-2 text-start text-xs font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)] hover:ring-[var(--color-gold)]/60 hover:shadow-[0_8px_18px_-10px_rgba(8,57,34,0.4)]"
-                      >
-                        <span aria-hidden className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)]">
-                          <s.Icon className="h-3 w-3" />
-                        </span>
-                        <span className="flex-1 truncate">{s.label}</span>
-                        <ArrowRight className="h-3 w-3 opacity-0 transition group-hover:opacity-100 rtl:rotate-180" />
-                      </motion.button>
-                    ))}
+                    {/* PRIMARY actions (visually distinct) — they DO things on the site */}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {actions.map((a, i) => (
+                        <motion.button
+                          key={a.label}
+                          onClick={a.onClick}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.35 + i * 0.07, duration: 0.35 }}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--color-rlc-800)] to-[var(--color-rlc-900)] px-3 py-2.5 text-start text-xs font-semibold text-[var(--color-cream)] shadow-[0_10px_22px_-12px_rgba(8,57,34,0.5)] transition hover:from-[var(--color-rlc-700)] hover:to-[var(--color-rlc-800)] hover:shadow-[0_14px_28px_-12px_rgba(8,57,34,0.6)]"
+                        >
+                          <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--color-gold)] text-[var(--color-rlc-900)]">
+                            <a.Icon className="h-3.5 w-3.5" />
+                          </span>
+                          <span className="flex flex-col">
+                            <span>{a.label}</span>
+                            <span className="text-[0.65rem] font-normal opacity-80">{a.sublabel}</span>
+                          </span>
+                          <ArrowRight className="ms-auto h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* SECONDARY question chips */}
+                    <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                      {suggestions.map((s, i) => (
+                        <motion.button
+                          key={s.label}
+                          onClick={() => sendText(s.question)}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + i * 0.05, duration: 0.3 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="group inline-flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-3 py-2 text-start text-xs font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)] hover:ring-[var(--color-gold)]/60"
+                        >
+                          <span aria-hidden className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)]">
+                            <s.Icon className="h-3 w-3" />
+                          </span>
+                          <span className="flex-1 truncate">{s.label}</span>
+                          <ArrowRight className="h-3 w-3 opacity-0 transition group-hover:opacity-100 rtl:rotate-180" />
+                        </motion.button>
+                      ))}
+                    </div>
                   </motion.div>
+                )}
+
+                {/* "Cancel guided flow" escape hatch — visible whenever we're collecting form info. */}
+                {mode !== 'chat' && (
+                  <button
+                    onClick={() => {
+                      setMode('chat');
+                      pushAssistant(locale === 'ar' ? 'حسناً، توقّفت عن تعبئة النموذج. أيّ سؤال آخر؟' : "Okay, I've stopped filling the form. Anything else?");
+                    }}
+                    className="mx-auto mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--color-ivory)] px-3 py-1 text-[0.65rem] font-medium text-[var(--color-ink-soft)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]"
+                  >
+                    <X className="h-3 w-3" /> {locale === 'ar' ? 'إلغاء التعبئة' : 'Cancel fill-in'}
+                  </button>
                 )}
               </div>
             </div>
@@ -340,7 +553,11 @@ export function Chatbot() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={locale === 'ar' ? 'اكتب رسالة...' : 'Type a message…'}
+                placeholder={placeholder}
+                /* When collecting an email, hint the right keyboard on mobile.
+                   Same for phone. */
+                type={mode === 'booking-email' ? 'email' : mode === 'booking-phone' ? 'tel' : 'text'}
+                inputMode={mode === 'booking-phone' ? 'tel' : undefined}
                 className="flex-1 rounded-full bg-[var(--color-ivory)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
               />
               <button
