@@ -119,7 +119,7 @@ export function PortalShell({
   );
 }
 
-/** Shared login screen for portals (magic-link via Supabase). */
+/** Shared portal login. Supports password sign-in (default) AND magic link. */
 export function PortalLogin({
   role,
   successHref,
@@ -127,7 +127,10 @@ export function PortalLogin({
   role: 'teacher' | 'student';
   successHref: string;
 }) {
+  const router = useRouter();
+  const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,12 +140,18 @@ export function PortalLogin({
     setPending(true); setError(null);
     try {
       const sb = getSupabaseBrowser();
-      const { error } = await sb.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}${successHref}` },
-      });
-      if (error) setError(error.message);
-      else setDone(true);
+      if (mode === 'password') {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) { setError(error.message); return; }
+        router.push(successHref);
+      } else {
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: `${window.location.origin}${successHref}` },
+        });
+        if (error) setError(error.message);
+        else setDone(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -159,9 +168,16 @@ export function PortalLogin({
             {role} portal
           </div>
           <h1 className="mt-6 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)]">Sign in</h1>
-          <p className="mt-2 text-sm text-[var(--color-ink-soft)]">
-            Enter your email and we&apos;ll send you a one-time login link.
-          </p>
+          <div className="mt-4 inline-flex rounded-full bg-[var(--color-cream)] p-1 ring-1 ring-[var(--color-line)]">
+            <button onClick={() => { setMode('password'); setDone(false); setError(null); }}
+              className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-[0.14em] ${mode === 'password' ? 'bg-[var(--color-rlc-800)] text-[var(--color-cream)]' : 'text-[var(--color-ink-soft)]'}`}>
+              Password
+            </button>
+            <button onClick={() => { setMode('magic'); setDone(false); setError(null); }}
+              className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-[0.14em] ${mode === 'magic' ? 'bg-[var(--color-rlc-800)] text-[var(--color-cream)]' : 'text-[var(--color-ink-soft)]'}`}>
+              Magic link
+            </button>
+          </div>
           {done ? (
             <div className="mt-6 rounded-sm bg-[var(--color-rlc-100)] p-5 text-sm text-[var(--color-rlc-800)]">
               Check <strong>{email}</strong> for your sign-in link.
@@ -173,10 +189,17 @@ export function PortalLogin({
                 placeholder="you@example.com" dir="ltr"
                 className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-3 ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
               />
+              {mode === 'password' && (
+                <input
+                  type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password" autoComplete="current-password"
+                  className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-3 ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
+                />
+              )}
               {error && <p className="text-xs text-[var(--color-rose)]">{error}</p>}
               <button type="submit" disabled={pending}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-rlc-800)] px-6 py-3 text-sm font-medium text-[var(--color-cream)] transition hover:bg-[var(--color-rlc-700)] disabled:opacity-50">
-                {pending ? 'Sending...' : 'Send magic link →'}
+                {pending ? (mode === 'password' ? 'Signing in...' : 'Sending...') : (mode === 'password' ? 'Sign in →' : 'Send magic link →')}
               </button>
             </form>
           )}
