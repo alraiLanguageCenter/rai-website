@@ -36,76 +36,76 @@
     ],
     "greetings": [
       {
-        "en": "Hello!",
-        "ar": "مرحباً!"
+        "text": "Hello!",
+        "lang": "English"
       },
       {
-        "en": "Bonjour!",
-        "ar": "بونجور!"
+        "text": "Bonjour !",
+        "lang": "French"
       },
       {
-        "en": "Hallo!",
-        "ar": "هالو!"
+        "text": "Hallo!",
+        "lang": "German"
       },
       {
-        "en": "Привет!",
-        "ar": "بريفيت!"
+        "text": "¡Hola!",
+        "lang": "Spanish"
       },
       {
-        "en": "¡Hola!",
-        "ar": "هولا!"
+        "text": "Ciao!",
+        "lang": "Italian"
       },
       {
-        "en": "Merhaba!",
-        "ar": "مرحبا!"
+        "text": "Olá!",
+        "lang": "Portuguese"
       },
       {
-        "en": "你好!",
-        "ar": "نِي هاو!"
+        "text": "Привет!",
+        "lang": "Russian"
       },
       {
-        "en": "こんにちは!",
-        "ar": "كونيتشيوا!"
+        "text": "Merhaba!",
+        "lang": "Turkish"
       },
       {
-        "en": "안녕하세요!",
-        "ar": "أنيونغ هاسيو!"
+        "text": "你好!",
+        "lang": "Chinese"
       },
       {
-        "en": "नमस्ते!",
-        "ar": "ناماستيه!"
+        "text": "こんにちは!",
+        "lang": "Japanese"
       },
       {
-        "en": "Ciao!",
-        "ar": "تشاو!"
+        "text": "안녕하세요!",
+        "lang": "Korean"
       },
       {
-        "en": "Olá!",
-        "ar": "أولا!"
+        "text": "नमस्ते!",
+        "lang": "Hindi"
       },
       {
-        "en": "Γειά σου!",
-        "ar": "ياسو!"
+        "text": "Γειά σου!",
+        "lang": "Greek"
       },
       {
-        "en": "שלום!",
-        "ar": "شالوم!"
+        "text": "שלום!",
+        "lang": "Hebrew"
       },
       {
-        "en": "Sawasdee!",
-        "ar": "سواديكاب!"
+        "text": "สวัสดี!",
+        "lang": "Thai"
       },
       {
-        "en": "Xin chào!",
-        "ar": "سين تشاو!"
+        "text": "Xin chào!",
+        "lang": "Vietnamese"
       },
       {
-        "en": "Cześć!",
-        "ar": "تشيشتش!"
+        "text": "Cześć!",
+        "lang": "Polish"
       },
       {
-        "en": "Welcome!",
-        "ar": "أهلاً وسهلاً!"
+        "text": "أهلاً!",
+        "lang": "Arabic"
       }
     ],
     "floatingWords": [

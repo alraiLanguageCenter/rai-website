@@ -57,8 +57,9 @@ export function Hero() {
     return () => clearInterval(id);
   }, [reduced, tickerLines.length]);
 
-  // Greeting bubbles
-  const greetings = t.raw('greetings') as { en: string; ar: string }[];
+  // Greeting bubbles. Each greeting is now a single native-script string
+  // (Hello, Bonjour, 你好, שלום…) plus a language tag for screen readers.
+  const greetings = t.raw('greetings') as { text: string; lang: string }[];
   const [greetIdx, setGreetIdx] = useState(0);
   useEffect(() => {
     if (reduced) return;
@@ -251,7 +252,19 @@ export function Hero() {
             {t('primaryCta')}
             <span aria-hidden className="rtl:rotate-180">→</span>
           </Button>
-          <Button href="#courses" size="lg" variant="secondary">
+          {/* "Explore courses" opens the 3D catalog book directly. We scroll
+              to #courses for context AND dispatch rai:open-catalog — the
+              Courses section listens and pops the book modal open. */}
+          <Button
+            href="#courses"
+            size="lg"
+            variant="secondary"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('rai:open-catalog'));
+              }
+            }}
+          >
             {t('secondaryCta')}
           </Button>
         </motion.div>
@@ -369,7 +382,7 @@ function ScatteredBubbles({
   greetings,
   cycle,
 }: {
-  greetings: { en: string; ar: string }[];
+  greetings: { text: string; lang: string }[];
   cycle: number;
 }) {
   // Track which greetings were used in the previous cycle so we never repeat them
@@ -395,12 +408,8 @@ function ScatteredBubbles({
   const picks = shuffled.slice(0, PER_CYCLE);
   lastUsedRef.current = new Set(picks.map((p) => p.i));
 
-  // Mix languages and tones each cycle. We just round-robin both — the
-  // greeting array already mixes scripts, so the visible variety comes from
-  // the data, not the rotation.
-  const langPattern: ('en' | 'ar')[] = r() > 0.5
-    ? ['en', 'ar', 'en', 'ar', 'en']
-    : ['ar', 'en', 'ar', 'en', 'ar'];
+  // Tone rotation per cycle (gold ↔ green). The greeting itself is rendered
+  // in its native script regardless of locale.
   const tonePattern: ('green' | 'gold')[] = r() > 0.5
     ? ['gold', 'green', 'gold', 'green', 'gold']
     : ['green', 'gold', 'green', 'gold', 'green'];
@@ -452,8 +461,8 @@ function ScatteredBubbles({
             className="absolute"
             style={{ top: spot.top, insetInlineEnd: spot.end }}
           >
-            <SpeechBubble side="right" tone={tonePattern[i] ?? 'green'}>
-              {langPattern[i] === 'en' ? picks[i]?.g.en : picks[i]?.g.ar}
+            <SpeechBubble side="right" tone={tonePattern[i] ?? 'green'} ariaLang={picks[i]?.g.lang}>
+              {picks[i]?.g.text}
             </SpeechBubble>
           </motion.div>
         ))}
@@ -491,11 +500,13 @@ function SpeechBubble({
   side,
   tone,
   delay = 0,
+  ariaLang,
 }: {
   children: React.ReactNode;
   side: 'left' | 'right';
   tone: 'green' | 'gold';
   delay?: number;
+  ariaLang?: string;
 }) {
   const greenCls = 'bg-[var(--color-rlc-800)] text-[var(--color-cream)]';
   const goldCls = 'bg-[var(--color-gold)] text-[var(--color-rlc-900)]';
@@ -504,6 +515,7 @@ function SpeechBubble({
       initial={{ opacity: 0, x: side === 'right' ? 12 : -12, scale: 0.94 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }}
+      aria-label={ariaLang ? `${ariaLang} greeting` : undefined}
       className={`relative inline-flex items-center rounded-2xl px-4 py-2 text-sm font-medium shadow-[0_12px_28px_-14px_rgba(8,57,34,0.45)] ${tone === 'green' ? greenCls : goldCls}`}
     >
       {children}

@@ -512,6 +512,15 @@ function CatalogTrigger() {
   const locale = useLocale() as 'ar' | 'en';
   const [open, setOpen] = useState(false);
 
+  // Listen for `rai:open-catalog` so the Hero's "Explore courses" button (and
+  // any other CTA on the site) can pop the 3D book modal directly without
+  // having to scroll into the Courses section and find the trigger button.
+  useEffect(() => {
+    function onRequest() { setOpen(true); }
+    window.addEventListener('rai:open-catalog', onRequest);
+    return () => window.removeEventListener('rai:open-catalog', onRequest);
+  }, []);
+
   return (
     <>
       <button
