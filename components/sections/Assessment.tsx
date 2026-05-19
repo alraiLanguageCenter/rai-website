@@ -142,7 +142,10 @@ export function Assessment() {
   function nextFromWrite() { setStage('capture'); }
 
   async function submitAll() {
-    if (!questions || !name || !email || !phone) return;
+    if (!questions || !name.trim() || !email.trim() || !phone.trim()) {
+      toast.error(locale === 'ar' ? 'يرجى تعبئة الاسم والبريد ورقم الهاتف.' : 'Please fill in name, email, and phone.');
+      return;
+    }
     setStage('sending');
     try {
       // Estimate provisional level from MCQ for the analysis prompt
@@ -153,7 +156,11 @@ export function Assessment() {
         pct >= 0.55 ? 'B1' :
         pct >= 0.4  ? 'A2' : 'A1';
 
-      const mcqAnswers = answers.map((selectedIndex, i) => ({
+      // Ensure we always have at least one answer in the payload (server requires .min(1)).
+      // If the user somehow reaches capture without completing MCQs (e.g. via a future
+      // skip path), synthesise a single "not answered" row from the first question.
+      const filledAnswers = answers.length > 0 ? answers : (questions.length > 0 ? [0] : []);
+      const mcqAnswers = filledAnswers.map((selectedIndex, i) => ({
         questionId: questions[i].id,
         selectedIndex,
         correct: selectedIndex === questions[i].correct_idx,
@@ -161,24 +168,64 @@ export function Assessment() {
         difficulty: questions[i].difficulty ?? 1,
       }));
 
-      const res = await fetch('/api/assessment/submit', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          name, email, phone, locale,
-          level: provisional,
-          score,
-          answers: mcqAnswers,
-          speech: { reference: READING_PASSAGE, transcript: transcript || '' },
-          writing: { prompt: WRITING_PROMPT.en, text: writtenText || '' },
-          sendEmail: true,
-        }),
-      });
-      if (!res.ok) throw new Error('Failed');
+      // Client-side timeout — if the server takes more than 60s we surface a clear error.
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 60_000);
+
+      let res: Response;
+      try {
+        res = await fetch('/api/assessment/submit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            locale,
+            level: provisional,
+            score,
+            answers: mcqAnswers,
+            speech: { reference: READING_PASSAGE, transcript: transcript || '' },
+            writing: { prompt: WRITING_PROMPT.en, text: writtenText || '' },
+            sendEmail: true,
+          }),
+          signal: ctrl.signal,
+        });
+      } finally {
+        clearTimeout(tid);
+      }
+
+      const payload = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        emailed?: boolean;
+        emailError?: string | null;
+        analysisError?: string | null;
+        error?: string;
+      };
+
+      if (!res.ok || payload.ok === false) {
+        throw new Error(payload.error || `HTTP ${res.status}`);
+      }
+
+      // Success path. Show a tailored toast based on whether the email actually
+      // landed: even when the email provider has trouble, the attempt is logged.
       setStage('sent');
-      toast.success(t('sent'));
-    } catch {
-      toast.error(locale === 'ar' ? 'تعذّر الإرسال. حاول مرة أخرى.' : 'Failed to send. Please try again.');
+      if (payload.emailed) {
+        toast.success(t('sent'));
+      } else {
+        toast.success(
+          locale === 'ar'
+            ? 'تم تسجيل نتيجتك. سيتواصل معك الفريق قريباً.'
+            : 'Your result has been recorded. Our team will reach out shortly.',
+        );
+      }
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.name === 'AbortError'
+          ? (locale === 'ar' ? 'استغرق الإرسال وقتاً طويلاً. حاول مرة أخرى.' : 'The send took too long. Please try again.')
+          : (locale === 'ar' ? 'تعذّر الإرسال. تأكّد من الاتصال بالإنترنت وحاول مرة أخرى.' : 'Could not send. Check your connection and try again.');
+      console.error('[assessment] submit failed', err);
+      toast.error(msg);
       setStage('capture');
     }
   }
@@ -447,7 +494,13 @@ export function Assessment() {
               </div>
 
               <div className="mt-6">
-                <Button onClick={submitAll} size="lg" variant="gold" magnetic disabled={!name || !email || !phone}>
+                <Button
+                  type="button"
+                  onClick={submitAll}
+                  size="lg"
+                  variant="gold"
+                  disabled={!name.trim() || !email.trim() || !phone.trim()}
+                >
                   {t('send')} <Send className="h-4 w-4 rtl:rotate-180" />
                 </Button>
               </div>

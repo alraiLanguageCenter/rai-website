@@ -365,23 +365,34 @@ Return a detailed JSON report, strictly this schema, no prose around it:
   "overallLevel": "A1|A2|B1|B2|C1|C2"
 }`;
 
-    const resp = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: 'You are an experienced senior English teacher. You return strictly valid JSON matching the user\'s schema, no prose around it.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.5,
-        response_format: { type: 'json_object' },
-        max_tokens: 2000,
-      }),
-    });
+    // Hard timeout — DeepSeek can occasionally hang. If we don't get a response
+    // within 30s, abort and fall back to the deterministic template narrative.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
+    let resp: Response;
+    try {
+      resp = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: 'You are an experienced senior English teacher. You return strictly valid JSON matching the user\'s schema, no prose around it.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.5,
+          response_format: { type: 'json_object' },
+          max_tokens: 2000,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
     if (!resp.ok) {
       const t = await resp.text().catch(() => '');
       console.warn('[deepseek] non-200', resp.status, t);

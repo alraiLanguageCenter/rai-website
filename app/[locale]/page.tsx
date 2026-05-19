@@ -9,8 +9,7 @@ import { Courses } from '@/components/sections/Courses';
 import { WhyUs } from '@/components/sections/WhyUs';
 import { Journey } from '@/components/sections/Journey';
 import { Schedule } from '@/components/sections/Schedule';
-import { WallOfWins } from '@/components/sections/WallOfWins';
-import { Testimonials } from '@/components/sections/Testimonials';
+import { StudentStories } from '@/components/sections/StudentStories';
 import { Assessment } from '@/components/sections/Assessment';
 import { Booking } from '@/components/sections/Booking';
 import { Contact } from '@/components/sections/Contact';
@@ -31,8 +30,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <WhyUs />
       <Journey />
       <Schedule />
-      <WallOfWins />
-      <Testimonials />
+      <StudentStories />
       <Assessment />
       <Booking />
       <Contact />

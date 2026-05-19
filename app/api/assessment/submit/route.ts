@@ -4,6 +4,18 @@ import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase/admin';
 import { generateAnalysis, type AnsweredQuestion } from '@/lib/assessment/analysis';
 import { sendAssessmentReport } from '@/lib/notify/assessment-email';
 
+/**
+ * Assessment submission endpoint.
+ *
+ * Design goals:
+ *   1. NEVER fail the request if the email send fails — the candidate's attempt is
+ *      always logged to Supabase and the admin can review it later.
+ *   2. NEVER hang waiting for DeepSeek — the AI call has its own internal timeout
+ *      and falls back to a template narrative if it doesn't return in time.
+ *   3. Return structured info (analysisError / emailError) so the client can give
+ *      the user a precise message about what worked and what didn't.
+ */
+
 const inputSchema = z.object({
   name: z.string().optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
@@ -33,15 +45,20 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
   const parsed = inputSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validation failed', issues: parsed.error.issues }, { status: 422 });
+    return NextResponse.json(
+      { ok: false, error: 'Validation failed', issues: parsed.error.issues },
+      { status: 422 },
+    );
   }
   const d = parsed.data;
 
-  // Always log the attempt
+  // 1) Always log the attempt to Supabase. If this fails, we keep going — we still
+  //    want to email the admin and give the candidate a result.
+  let logged = false;
   if (isSupabaseConfigured()) {
     try {
       const sb = getSupabaseAdmin();
@@ -54,19 +71,22 @@ export async function POST(req: Request) {
         answers: d.answers,
         locale: d.locale,
       });
+      logged = true;
     } catch (e) {
       console.warn('[assessment/submit] log failed', e);
     }
   }
 
-  // If the caller doesn't want the email yet (initial silent log), stop here.
+  // 2) If the caller doesn't want the email yet (initial silent log), stop here.
   if (!d.sendEmail || !d.email) {
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, logged });
   }
 
-  // Generate the AI-graded analysis + radar chart + study plan
+  // 3) Generate analysis. If it throws, fall back to a minimal payload so the
+  //    email still goes through with the MCQ data we already have.
   const total = d.answers.length;
   let analysis;
+  let analysisError: string | null = null;
   try {
     analysis = await generateAnalysis({
       name: d.name || (d.locale === 'ar' ? 'الطالب' : 'Student'),
@@ -80,11 +100,38 @@ export async function POST(req: Request) {
       writing: d.writing,
     });
   } catch (e) {
-    console.error('[assessment/submit] analysis failed', e);
-    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+    analysisError = e instanceof Error ? e.message : String(e);
+    console.error('[assessment/submit] analysis failed, using minimal fallback', e);
+    // Minimal fallback so the admin still gets a notification.
+    analysis = {
+      level: d.level,
+      score: d.score,
+      total,
+      skills: [],
+      summary: 'Automated analysis was unavailable. Raw MCQ score included; please review.',
+      competencies: [],
+      recommendedCourse: {
+        id: 'adults',
+        title: 'Discovery Session',
+        why: 'Book a free discovery session and we will recommend the best course in person.',
+      },
+      studyPlan: [],
+      radarSvg:
+        '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="40"><text x="0" y="22" font-family="Georgia,serif" font-size="14" fill="#0F1B1D">Analysis unavailable — see raw answers below.</text></svg>',
+      speechExcerpt: d.speech
+        ? { reference: d.speech.reference, transcript: d.speech.transcript, accuracyPct: 0 }
+        : undefined,
+      writingExcerpt: d.writing
+        ? { prompt: d.writing.prompt, text: d.writing.text, wordCount: d.writing.text.split(/\s+/).filter(Boolean).length }
+        : undefined,
+    };
   }
 
-  // Send the branded report to admin
+  // 4) Send the email to the admin inbox. If Resend isn't configured or returns
+  //    an error, log it and return ok:true with emailed:false — the candidate's
+  //    attempt is in Supabase, the admin can review it from /admin/assessments.
+  let emailed = false;
+  let emailError: string | null = null;
   try {
     const res = await sendAssessmentReport({
       to: d.email,
@@ -93,16 +140,31 @@ export async function POST(req: Request) {
       locale: d.locale,
       analysis,
     });
-    if (!res.ok && !('skipped' in res && res.skipped)) {
-      return NextResponse.json({ error: 'Email send failed' }, { status: 500 });
+    if ('skipped' in res && res.skipped) {
+      emailError = 'Email provider not configured (skipped)';
+    } else if (!res.ok) {
+      const errObj = (res as { error?: { message?: string; name?: string } | string }).error;
+      emailError =
+        typeof errObj === 'string'
+          ? errObj
+          : errObj?.message || errObj?.name || 'Email provider returned an error';
+    } else {
+      emailed = true;
     }
-    return NextResponse.json({
-      ok: true,
-      emailed: !('skipped' in res && res.skipped),
-      level: analysis.level,
-    });
   } catch (e) {
+    emailError = e instanceof Error ? e.message : String(e);
     console.error('[assessment/submit] email failed', e);
-    return NextResponse.json({ error: 'Email failed' }, { status: 500 });
   }
+
+  // 5) Always return 200 if we got this far — the candidate's attempt is recorded
+  //    and the admin can follow up. The response carries the truth about whether
+  //    the email went out so the client can show an appropriate message.
+  return NextResponse.json({
+    ok: true,
+    logged,
+    emailed,
+    level: analysis.level,
+    analysisError,
+    emailError,
+  });
 }

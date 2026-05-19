@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Headphones, MessageCircle, BookOpen, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KineticText } from '@/components/motion/KineticText';
+import { Typewriter } from '@/components/motion/Typewriter';
 
 const GLYPH_CYCLE = ['A', 'B', 'E', 'ع', 'ك'];
 
@@ -220,11 +221,17 @@ export function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 1.05, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
           className="mt-6 max-w-xl body-lg text-[var(--color-ink-soft)]"
         >
-          {t('lede')}
-          <BlinkingCursor />
+          <Typewriter
+            text={t('lede')}
+            start="mount"
+            delay={1.15}
+            speed={42}
+            caret
+            caretClassName="bg-[var(--color-rlc-700)]"
+          />
         </motion.p>
 
         <motion.div

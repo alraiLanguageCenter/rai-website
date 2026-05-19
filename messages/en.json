@@ -35,34 +35,122 @@
       "Travel the world."
     ],
     "greetings": [
-      { "en": "Hello!",                "ar": "مرحباً!" },
-      { "en": "Welcome.",              "ar": "أهلاً." },
-      { "en": "Nice to meet you.",     "ar": "تشرّفنا." },
-      { "en": "Let's begin.",          "ar": "لنبدأ." },
-      { "en": "How are you?",          "ar": "كيف حالك؟" },
-      { "en": "Good morning!",         "ar": "صباح الخير!" },
-      { "en": "Speak with me.",        "ar": "تحدّث معي." },
-      { "en": "Yes, you can.",         "ar": "نعم، تستطيع." },
-      { "en": "Tell me more.",         "ar": "أخبرني المزيد." },
-      { "en": "Don't be afraid.",      "ar": "لا تخف." },
-      { "en": "I understand.",         "ar": "أفهم ذلك." },
-      { "en": "Try again.",            "ar": "حاول مرة أخرى." },
-      { "en": "You're doing great.",   "ar": "أداؤك رائع." },
-      { "en": "Practice makes perfect.","ar": "الممارسة تصنع الكمال." },
-      { "en": "Are you ready?",        "ar": "هل أنت جاهز؟" },
-      { "en": "Open a new door.",      "ar": "افتح باباً جديداً." }
+      {
+        "en": "Hello!",
+        "ar": "مرحباً!"
+      },
+      {
+        "en": "Welcome.",
+        "ar": "أهلاً."
+      },
+      {
+        "en": "Nice to meet you.",
+        "ar": "تشرّفنا."
+      },
+      {
+        "en": "Let's begin.",
+        "ar": "لنبدأ."
+      },
+      {
+        "en": "How are you?",
+        "ar": "كيف حالك؟"
+      },
+      {
+        "en": "Good morning!",
+        "ar": "صباح الخير!"
+      },
+      {
+        "en": "Speak with me.",
+        "ar": "تحدّث معي."
+      },
+      {
+        "en": "Yes, you can.",
+        "ar": "نعم، تستطيع."
+      },
+      {
+        "en": "Tell me more.",
+        "ar": "أخبرني المزيد."
+      },
+      {
+        "en": "Don't be afraid.",
+        "ar": "لا تخف."
+      },
+      {
+        "en": "I understand.",
+        "ar": "أفهم ذلك."
+      },
+      {
+        "en": "Try again.",
+        "ar": "حاول مرة أخرى."
+      },
+      {
+        "en": "You're doing great.",
+        "ar": "أداؤك رائع."
+      },
+      {
+        "en": "Practice makes perfect.",
+        "ar": "الممارسة تصنع الكمال."
+      },
+      {
+        "en": "Are you ready?",
+        "ar": "هل أنت جاهز؟"
+      },
+      {
+        "en": "Open a new door.",
+        "ar": "افتح باباً جديداً."
+      }
     ],
     "floatingWords": [
-      "Hello",       "Speak",       "Listen",      "Read",         "Write",
-      "Confidence",  "Fluency",     "Welcome",     "Conversation", "Discover",
-      "Imagine",     "Curiosity",   "Practice",    "Vocabulary",   "Grammar",
-      "Storytelling","Pronounce",   "Express",     "Connect",      "Dream",
-      "Bonjour",     "Wonderful",   "Together",    "Believe",      "Grow",
-      "Adventure",   "Inspire",     "Open",        "Voice",        "Story",
-      "Idea",        "Travel",      "Future",      "Curious",      "Brave",
-      "Articulate",  "Eloquent",    "Friend",      "Question",     "Answer",
-      "Bonjour",     "Hola",        "Welcome",     "Charm",        "Spark",
-      "Words",       "Wonder",      "Begin",       "Yes!",         "Today"
+      "Hello",
+      "Speak",
+      "Listen",
+      "Read",
+      "Write",
+      "Confidence",
+      "Fluency",
+      "Welcome",
+      "Conversation",
+      "Discover",
+      "Imagine",
+      "Curiosity",
+      "Practice",
+      "Vocabulary",
+      "Grammar",
+      "Storytelling",
+      "Pronounce",
+      "Express",
+      "Connect",
+      "Dream",
+      "Bonjour",
+      "Wonderful",
+      "Together",
+      "Believe",
+      "Grow",
+      "Adventure",
+      "Inspire",
+      "Open",
+      "Voice",
+      "Story",
+      "Idea",
+      "Travel",
+      "Future",
+      "Curious",
+      "Brave",
+      "Articulate",
+      "Eloquent",
+      "Friend",
+      "Question",
+      "Answer",
+      "Bonjour",
+      "Hola",
+      "Welcome",
+      "Charm",
+      "Spark",
+      "Words",
+      "Wonder",
+      "Begin",
+      "Yes!",
+      "Today"
     ]
   },
   "brandStrip": {
@@ -96,34 +184,109 @@
     "title": "Six paths. One goal: language mastery.",
     "lede": "Whatever your age, level, or schedule — there's a Rai path designed for you.",
     "items": [
-      { "id": "kids",      "title": "Kids & Teens",         "tag": "Ages 7 – 17",        "badge": "Loved by parents", "summary": "Programs designed to build fluency through fun and interaction.",                  "details": "We use educational games, stories, and group activities to build a strong language foundation and a lasting love of learning. Small groups, similar age cohorts.", "cta": "Reserve a seat" },
-      { "id": "adults",    "title": "Adult Conversation",   "tag": "All levels",         "badge": "Most popular",     "summary": "From zero to fluent — a practical curriculum that puts conversation first.",      "details": "We integrate all four skills with a special focus on real-world conversation: everyday situations, debates, and presentations. Morning and evening groups.",       "cta": "Get started" },
-      { "id": "exams",     "title": "TOEFL & IELTS Prep",   "tag": "International exams","badge": "High scores",      "summary": "Intensive training and weekly reviews with full mock exams.",                     "details": "We cover all four sections with specialized strategies. Detailed performance analysis and training to manage time and pressure on exam day.",                      "cta": "Start preparing" },
-      { "id": "business",  "title": "Business English",     "tag": "For professionals",  "badge": "Career boost",     "summary": "Workplace language: correspondence, presentations, negotiation, and meetings.",   "details": "Content designed for the demands of modern work: writing emails and reports, presenting, and the vocabulary of your industry. Private or group sessions.",         "cta": "Level up" },
-      { "id": "private",   "title": "Private 1-on-1",       "tag": "Fully bespoke",      "badge": "Fastest progress", "summary": "Your own instructor, your pace, your goal. The most personal path to fluency.",    "details": "A dedicated instructor matched to your goal — exam prep, accent coaching, interview practice, or just confidence. Flexible scheduling around your life.",          "cta": "Reserve your tutor" },
-      { "id": "online",    "title": "Online Live Classes",  "tag": "From anywhere",      "badge": "New",              "summary": "The same Rai experience — live, interactive, small group — from your screen.",    "details": "Live HD video classes with the same instructors and the same curriculum. Designed for students abroad and busy professionals.",                                     "cta": "Join online" }
+      {
+        "id": "kids",
+        "title": "Kids & Teens",
+        "tag": "Ages 7 – 17",
+        "badge": "Loved by parents",
+        "summary": "Programs designed to build fluency through fun and interaction.",
+        "details": "We use educational games, stories, and group activities to build a strong language foundation and a lasting love of learning. Small groups, similar age cohorts.",
+        "cta": "Reserve a seat"
+      },
+      {
+        "id": "adults",
+        "title": "Adult Conversation",
+        "tag": "All levels",
+        "badge": "Most popular",
+        "summary": "From zero to fluent — a practical curriculum that puts conversation first.",
+        "details": "We integrate all four skills with a special focus on real-world conversation: everyday situations, debates, and presentations. Morning and evening groups.",
+        "cta": "Get started"
+      },
+      {
+        "id": "exams",
+        "title": "TOEFL & IELTS Prep",
+        "tag": "International exams",
+        "badge": "High scores",
+        "summary": "Intensive training and weekly reviews with full mock exams.",
+        "details": "We cover all four sections with specialized strategies. Detailed performance analysis and training to manage time and pressure on exam day.",
+        "cta": "Start preparing"
+      },
+      {
+        "id": "business",
+        "title": "Business English",
+        "tag": "For professionals",
+        "badge": "Career boost",
+        "summary": "Workplace language: correspondence, presentations, negotiation, and meetings.",
+        "details": "Content designed for the demands of modern work: writing emails and reports, presenting, and the vocabulary of your industry. Private or group sessions.",
+        "cta": "Level up"
+      },
+      {
+        "id": "private",
+        "title": "Private 1-on-1",
+        "tag": "Fully bespoke",
+        "badge": "Fastest progress",
+        "summary": "Your own instructor, your pace, your goal. The most personal path to fluency.",
+        "details": "A dedicated instructor matched to your goal — exam prep, accent coaching, interview practice, or just confidence. Flexible scheduling around your life.",
+        "cta": "Reserve your tutor"
+      },
+      {
+        "id": "online",
+        "title": "Online Live Classes",
+        "tag": "From anywhere",
+        "badge": "New",
+        "summary": "The same Rai experience — live, interactive, small group — from your screen.",
+        "details": "Live HD video classes with the same instructors and the same curriculum. Designed for students abroad and busy professionals.",
+        "cta": "Join online"
+      }
     ]
   },
   "schedule": {
     "eyebrow": "Schedule",
     "title": "Book your next slot.",
-    "tabs": { "courses": "Courses", "exams": "Exams" },
-    "kind": { "course": "Course", "exam": "Exam" },
-    "status": { "open": "Open", "closed": "Closed", "full": "Full" },
+    "tabs": {
+      "courses": "Courses",
+      "exams": "Exams"
+    },
+    "kind": {
+      "course": "Course",
+      "exam": "Exam"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed",
+      "full": "Full"
+    },
     "register": "Register",
     "soldOut": "Sold out",
     "viewAll": "All slots",
     "empty": "No upcoming entries.",
-    "fields": { "starts": "Starts", "ends": "Ends", "room": "Room", "seats": "Seats left" }
+    "fields": {
+      "starts": "Starts",
+      "ends": "Ends",
+      "room": "Room",
+      "seats": "Seats left"
+    }
   },
   "why": {
     "eyebrow": "Why us",
     "title": "Standards we won't compromise on.",
     "items": [
-      { "title": "Experienced instructors", "body": "A handpicked team with strong academic backgrounds and real teaching experience." },
-      { "title": "Modern, interactive curriculum", "body": "Continuously updated materials that blend the book, live practice, and technology." },
-      { "title": "Supportive environment", "body": "A safe space to learn — make mistakes with confidence, grow faster than expected." },
-      { "title": "Documented results", "body": "Thousands of graduates, hundreds of success stories, and distinguished international exam scores." }
+      {
+        "title": "Experienced instructors",
+        "body": "A handpicked team with strong academic backgrounds and real teaching experience."
+      },
+      {
+        "title": "Modern, interactive curriculum",
+        "body": "Continuously updated materials that blend the book, live practice, and technology."
+      },
+      {
+        "title": "Supportive environment",
+        "body": "A safe space to learn — make mistakes with confidence, grow faster than expected."
+      },
+      {
+        "title": "Documented results",
+        "body": "Thousands of graduates, hundreds of success stories, and distinguished international exam scores."
+      }
     ]
   },
   "journey": {
@@ -134,11 +297,36 @@
     "finish": "Success",
     "flipHint": "Hover to learn more",
     "steps": [
-      { "n": "01", "title": "Placement test",            "body": "We assess your current level — online quiz or in-center — and find your starting point.",         "back": "Quick, friendly, and pressure-free. You get a clear CEFR level on the spot." },
-      { "n": "02", "title": "Personalized plan",         "body": "We craft a learning path tailored to your age, level, and goal: conversation, exams, or business.","back": "Goals → milestones → weekly sessions. You always know what's next." },
-      { "n": "03", "title": "Live, interactive classes", "body": "Small groups or one-on-one, with experienced instructors and weekly interactive assignments.",     "back": "Real practice, real conversations. We make speaking feel safe." },
-      { "n": "04", "title": "Progress tracking",         "body": "Continuous monitoring with milestones, mock tests, and clear feedback at every stage.",            "back": "You get reports. You see your growth. You stay accountable." },
-      { "n": "05", "title": "You speak with confidence", "body": "Real fluency you use in life, work, and study — and a certificate that proves it.",                 "back": "Graduates land jobs, ace exams, and travel without fear." }
+      {
+        "n": "01",
+        "title": "Placement test",
+        "body": "We assess your current level — online quiz or in-center — and find your starting point.",
+        "back": "Quick, friendly, and pressure-free. You get a clear CEFR level on the spot."
+      },
+      {
+        "n": "02",
+        "title": "Personalized plan",
+        "body": "We craft a learning path tailored to your age, level, and goal: conversation, exams, or business.",
+        "back": "Goals → milestones → weekly sessions. You always know what's next."
+      },
+      {
+        "n": "03",
+        "title": "Live, interactive classes",
+        "body": "Small groups or one-on-one, with experienced instructors and weekly interactive assignments.",
+        "back": "Real practice, real conversations. We make speaking feel safe."
+      },
+      {
+        "n": "04",
+        "title": "Progress tracking",
+        "body": "Continuous monitoring with milestones, mock tests, and clear feedback at every stage.",
+        "back": "You get reports. You see your growth. You stay accountable."
+      },
+      {
+        "n": "05",
+        "title": "You speak with confidence",
+        "body": "Real fluency you use in life, work, and study — and a certificate that proves it.",
+        "back": "Graduates land jobs, ace exams, and travel without fear."
+      }
     ]
   },
   "wins": {
@@ -151,11 +339,31 @@
     "eyebrow": "What they say",
     "title": "In their words.",
     "items": [
-      { "name": "Ali Nasser", "course": "Language & Conversation", "quote": "The lessons were engaging and genuinely fun, but what touched me most was feeling part of a real learning community." },
-      { "name": "Sarah Ahmed", "course": "Business English", "quote": "For the first time I feel fully confident in meetings. The results showed in just a few weeks." },
-      { "name": "Reem Khoury", "course": "IELTS Prep", "quote": "I scored 8.0 on the IELTS on my first attempt — thanks to the method and the weekly mock exams." },
-      { "name": "Mohammed Al-Hasan", "course": "TOEFL Prep", "quote": "The instructors don't just teach you the language — they teach you to think in it." },
-      { "name": "Layla Deeb", "course": "Language & Conversation", "quote": "I started from zero, and within a year I was reading English novels for pleasure." }
+      {
+        "name": "Ali Nasser",
+        "course": "Language & Conversation",
+        "quote": "The lessons were engaging and genuinely fun, but what touched me most was feeling part of a real learning community."
+      },
+      {
+        "name": "Sarah Ahmed",
+        "course": "Business English",
+        "quote": "For the first time I feel fully confident in meetings. The results showed in just a few weeks."
+      },
+      {
+        "name": "Reem Khoury",
+        "course": "IELTS Prep",
+        "quote": "I scored 8.0 on the IELTS on my first attempt — thanks to the method and the weekly mock exams."
+      },
+      {
+        "name": "Mohammed Al-Hasan",
+        "course": "TOEFL Prep",
+        "quote": "The instructors don't just teach you the language — they teach you to think in it."
+      },
+      {
+        "name": "Layla Deeb",
+        "course": "Language & Conversation",
+        "quote": "I started from zero, and within a year I was reading English novels for pleasure."
+      }
     ]
   },
   "assess": {
@@ -193,7 +401,12 @@
       "phonePh": "+963 ...",
       "ageGroup": "Age group",
       "ageGroupPh": "Choose group",
-      "ages": { "child": "Child (7–12)", "teen": "Teen (13–17)", "adult": "Adult (18+)", "professional": "Professional" },
+      "ages": {
+        "child": "Child (7–12)",
+        "teen": "Teen (13–17)",
+        "adult": "Adult (18+)",
+        "professional": "Professional"
+      },
       "slots": "Three preferred slots",
       "slotPh": "Pick a date and time",
       "addSlot": "Add a slot",
@@ -220,7 +433,13 @@
       "phonePh": "+963 ...",
       "course": "Course of interest",
       "coursePh": "Choose a course",
-      "courseOptions": { "kids": "Kids & Teens", "adults": "Adult Conversation", "exams": "TOEFL/IELTS Prep", "business": "Business English", "other": "Other" },
+      "courseOptions": {
+        "kids": "Kids & Teens",
+        "adults": "Adult Conversation",
+        "exams": "TOEFL/IELTS Prep",
+        "business": "Business English",
+        "other": "Other"
+      },
       "message": "Your message",
       "messagePh": "Tell us about your level and goal...",
       "submit": "Send",
@@ -259,5 +478,11 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Try again"
+  },
+  "stories": {
+    "eyebrow": "Student stories",
+    "title": "Voices & wins of Rai.",
+    "lede": "Thirty years of stories. These are our students — in their own words, with their results, on their journey.",
+    "open": "Open the wall of voices"
   }
 }
