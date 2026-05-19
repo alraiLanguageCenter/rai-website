@@ -48,7 +48,12 @@
       "Confidence",  "Fluency",     "Welcome",     "Conversation", "Discover",
       "Imagine",     "Curiosity",   "Practice",    "Vocabulary",   "Grammar",
       "Storytelling","Pronounce",   "Express",     "Connect",      "Dream",
-      "Bonjour",     "Wonderful",   "Together",    "Believe",      "Grow"
+      "Bonjour",     "Wonderful",   "Together",    "Believe",      "Grow",
+      "Adventure",   "Inspire",     "Open",        "Voice",        "Story",
+      "Idea",        "Travel",      "Future",      "Curious",      "Brave",
+      "Articulate",  "Eloquent",    "Friend",      "Question",     "Answer",
+      "Bonjour",     "Hola",        "Welcome",     "Charm",        "Spark",
+      "Words",       "Wonder",      "Begin",       "Yes!",         "Today"
     ]
   },
   "brandStrip": {
@@ -118,12 +123,13 @@
     "lede": "Five steps from your first hello to fluent confidence — supported every step of the way.",
     "start": "Start",
     "finish": "Success",
+    "flipHint": "Hover to learn more",
     "steps": [
-      { "n": "01", "title": "Free placement test", "body": "We assess your current level — online quiz or in-center — and find your starting point." },
-      { "n": "02", "title": "Personalized plan", "body": "We craft a learning path tailored to your age, level, and goal: conversation, exams, or business." },
-      { "n": "03", "title": "Live, interactive classes", "body": "Small groups or one-on-one, with experienced instructors and weekly interactive assignments." },
-      { "n": "04", "title": "Progress tracking", "body": "Continuous monitoring with milestones, mock tests, and clear feedback at every stage." },
-      { "n": "05", "title": "You speak with confidence", "body": "Real fluency you use in life, work, and study — and a certificate that proves it." }
+      { "n": "01", "title": "Placement test",            "body": "We assess your current level — online quiz or in-center — and find your starting point.",         "back": "Quick, friendly, and pressure-free. You get a clear CEFR level on the spot." },
+      { "n": "02", "title": "Personalized plan",         "body": "We craft a learning path tailored to your age, level, and goal: conversation, exams, or business.","back": "Goals → milestones → weekly sessions. You always know what's next." },
+      { "n": "03", "title": "Live, interactive classes", "body": "Small groups or one-on-one, with experienced instructors and weekly interactive assignments.",     "back": "Real practice, real conversations. We make speaking feel safe." },
+      { "n": "04", "title": "Progress tracking",         "body": "Continuous monitoring with milestones, mock tests, and clear feedback at every stage.",            "back": "You get reports. You see your growth. You stay accountable." },
+      { "n": "05", "title": "You speak with confidence", "body": "Real fluency you use in life, work, and study — and a certificate that proves it.",                 "back": "Graduates land jobs, ace exams, and travel without fear." }
     ]
   },
   "wins": {

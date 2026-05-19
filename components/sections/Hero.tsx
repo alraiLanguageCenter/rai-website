@@ -266,23 +266,41 @@ export function Hero() {
 /* -------------------------- Sub-components -------------------------- */
 
 function FloatingWords({ words }: { words: string[] }) {
-  // Each word gets unique deterministic-but-feels-random properties
+  // Denser placement: stagger each word into a 7-column × 7-row jitter grid,
+  // then add deterministic pseudo-random offsets so it doesn't look like a grid.
+  // Many style variations: size, italic, weight, color tone, drift direction.
   const placements = words.map((_, i) => {
-    // Deterministic pseudo-random from index — feels organic, stable between renders
     const r1 = ((i * 2654435761) % 1000) / 1000;
     const r2 = ((i * 1597334677) % 1000) / 1000;
     const r3 = ((i * 374761393)  % 1000) / 1000;
     const r4 = ((i * 911) % 1000) / 1000;
+    const r5 = ((i * 2147483647) % 1000) / 1000;
+    // 7×7 jitter grid
+    const cols = 7, rows = 7;
+    const col = i % cols;
+    const row = Math.floor(i / cols) % rows;
+    const cellW = 92 / cols;
+    const cellH = 92 / rows;
+    const top  = 4 + row * cellH + r1 * cellH * 0.85;
+    const left = 4 + col * cellW + r2 * cellW * 0.85;
+    // Drift direction: 0 = up, 1 = down, 2 = right, 3 = left (modular variety)
+    const dir = i % 4;
+    const driftY = dir === 0 ? [30, -30, -55] : dir === 1 ? [-30, 30, 55] : [0, -8, 5];
+    const driftX = dir === 2 ? [0, 18, 6] : dir === 3 ? [0, -18, -6] : [0, 4, -2];
     return {
-      top:    `${4 + r1 * 92}%`,
-      left:   `${3 + r2 * 94}%`,
-      delay:  r3 * 8,
-      duration: 7 + r4 * 7,
-      depth:  0.25 + r1 * 0.7,
-      fontSize: 0.7 + r2 * 1.1,
-      rotate: r3 * 14 - 7,
-      italic: r4 > 0.5,
-      goldTint: r1 > 0.78,
+      top: `${top}%`,
+      left: `${left}%`,
+      delay: r3 * 9,
+      duration: 6 + r4 * 8,
+      depth: 0.2 + r1 * 0.75,
+      fontSize: 0.55 + r2 * 1.7,   // wider size range: 0.55–2.25rem
+      rotate: r3 * 22 - 11,         // wider rotation: ±11°
+      italic: r4 > 0.55,
+      goldTint: r1 > 0.7,
+      heavy: r5 > 0.82,             // a few bold words
+      script: r5 > 0.92,             // very few in script-feel
+      driftY,
+      driftX,
     };
   });
 
@@ -290,21 +308,25 @@ function FloatingWords({ words }: { words: string[] }) {
     <div aria-hidden className="pointer-events-none absolute inset-0">
       {words.map((w, i) => {
         const p = placements[i];
+        const colorClass = p.goldTint ? 'text-[var(--color-gold)]/55' : 'text-[var(--color-rlc-800)]/40';
         return (
           <motion.span
             key={`${w}-${i}`}
-            className={`absolute select-none font-[var(--font-display)] ${p.italic ? 'italic' : ''} ${p.goldTint ? 'text-[var(--color-gold)]/55' : 'text-[var(--color-rlc-800)]/35'}`}
+            className={`absolute select-none whitespace-nowrap font-[var(--font-display)] ${p.italic ? 'italic' : ''} ${p.heavy ? 'font-semibold' : 'font-normal'} ${colorClass}`}
             style={{
               top: p.top,
               left: p.left,
               fontSize: `${p.fontSize}rem`,
-              filter: `blur(${(1 - p.depth) * 1.4}px)`,
-              letterSpacing: p.italic ? '-0.01em' : '0.01em',
+              filter: `blur(${(1 - p.depth) * 1.5}px)`,
+              letterSpacing: p.italic ? '-0.01em' : p.script ? '0.06em' : '0.01em',
+              fontStyle: p.script ? 'italic' : undefined,
+              transform: p.script ? 'skewX(-6deg)' : undefined,
             }}
-            initial={{ opacity: 0, y: 30, rotate: p.rotate }}
+            initial={{ opacity: 0, y: p.driftY[0], x: p.driftX[0], rotate: p.rotate }}
             animate={{
-              opacity: [0, p.depth * 0.8, 0],
-              y: [30, -30, -55],
+              opacity: [0, p.depth * 0.85, 0],
+              y: p.driftY,
+              x: p.driftX,
               rotate: [p.rotate, p.rotate + 2, p.rotate - 1],
             }}
             transition={{
