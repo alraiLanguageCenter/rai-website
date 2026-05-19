@@ -14,15 +14,10 @@ export function Logo({
   className?: string;
   withText?: boolean;
   animated?: boolean;
-  /** 'light' (cream bg) uses darken-blend to drop the white box. 'dark' (green bg) uses lighten-blend. */
   variant?: 'light' | 'dark';
 }) {
   const locale = useLocale();
   const reduced = useReducedMotion();
-
-  // Light bg (cream): mix-blend-darken makes the white box disappear cleanly.
-  // Dark bg (green): wrap in a cream badge so the colored logo reads — the badge
-  // becomes a deliberate brand-mark element instead of an unwanted white box.
   const isDark = variant === 'dark';
 
   const inner = (
@@ -35,29 +30,29 @@ export function Logo({
           opacity: { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 },
         }}
         whileHover={reduced ? undefined : { scale: 1.08 }}
-        className={`shrink-0 ${isDark ? 'rounded-md bg-[var(--color-cream)] p-2 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.4)] ring-1 ring-[var(--color-gold)]/40' : ''}`}
+        className="shrink-0"
       >
         <Image
-          src="/brand/rlc-logo.jpg"
+          src="/brand/rlc-logo-transparent.png"
           alt="Rai Language Center"
-          width={128}
-          height={128}
+          width={144}
+          height={144}
           priority
-          className={`object-contain ${isDark ? 'h-14 w-14 lg:h-16 lg:w-16' : 'h-20 w-20 mix-blend-darken lg:h-24 lg:w-24'}`}
+          className={`object-contain ${isDark ? 'h-16 w-16 lg:h-20 lg:w-20' : 'h-20 w-20 lg:h-24 lg:w-24'}`}
         />
       </motion.div>
       {withText && (
         <span className="flex flex-col leading-tight">
           <span
             className={`text-[0.68rem] uppercase tracking-[0.18em] ${
-              variant === 'dark' ? 'text-[var(--color-cream)]/70' : 'text-[var(--color-rlc-800)]/70'
+              isDark ? 'text-[var(--color-cream)]/70' : 'text-[var(--color-rlc-800)]/70'
             }`}
           >
             {locale === 'ar' ? 'منذ ١٩٩٥' : 'Since 1995'}
           </span>
           <span
             className={`text-base font-semibold ${
-              variant === 'dark' ? 'text-[var(--color-cream)]' : 'text-[var(--color-rlc-900)]'
+              isDark ? 'text-[var(--color-cream)]' : 'text-[var(--color-rlc-900)]'
             }`}
           >
             {locale === 'ar' ? 'مركز الراعي للغات' : 'Rai Language Center'}

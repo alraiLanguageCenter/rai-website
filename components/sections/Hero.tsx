@@ -12,7 +12,7 @@ import {
 } from 'framer-motion';
 import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { Headphones, MessageCircle, BookOpen, PenLine, Sparkles } from 'lucide-react';
+import { Headphones, MessageCircle, BookOpen, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KineticText } from '@/components/motion/KineticText';
 
@@ -181,7 +181,6 @@ export function Hero() {
         >
           <span className="h-px w-10 bg-[var(--color-gold)]" />
           {t('eyebrow')}
-          <Sparkles className="h-3.5 w-3.5 text-[var(--color-gold)]" />
         </motion.span>
 
         <div className="mt-6">

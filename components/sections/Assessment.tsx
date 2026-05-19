@@ -42,13 +42,19 @@ export function Assessment() {
     (async () => {
       try {
         const sb = getSupabaseBrowser();
-        const [qRes, lRes, rRes] = await Promise.all([
-          sb.from('quiz_questions').select('id,prompt_en,prompt_ar,options,correct_idx,difficulty,skill_tag').eq('active', true).order('sort_order', { ascending: true }).limit(15),
+        // Random-sample 20 questions per attempt so every taker gets a fresh set.
+        const sampleRes = await fetch('/api/quiz/questions?count=20').then((r) => r.json()).catch(() => null);
+        if (sampleRes?.ok && Array.isArray(sampleRes.questions) && sampleRes.questions.length > 0) {
+          setQuestions(sampleRes.questions as Q[]);
+        } else {
+          // Fallback: direct anon read
+          const qRes = await sb.from('quiz_questions').select('id,prompt_en,prompt_ar,options,correct_idx,difficulty,skill_tag').eq('active', true).limit(20);
+          setQuestions(qRes.error ? [] : ((qRes.data ?? []) as Q[]));
+        }
+        const [lRes, rRes] = await Promise.all([
           sb.from('quiz_levels').select('code,label_en,label_ar,min_score').order('sort_order', { ascending: true }),
           sb.from('quiz_recommendations').select('level_code,books,notes_en,notes_ar'),
         ]);
-        if (!qRes.error && qRes.data) setQuestions(qRes.data as Q[]);
-        else setQuestions([]);
         if (!lRes.error && lRes.data) setLevels(lRes.data as Level[]);
         if (!rRes.error && rRes.data) setRecs(rRes.data as Rec[]);
       } catch {
@@ -241,13 +247,30 @@ export function Assessment() {
                     <div className="font-[var(--font-display)] text-lg text-[var(--color-rlc-900)]">{t('captureTitle')}</div>
                     <p className="mt-1 text-sm text-[var(--color-ink-soft)]">{t('captureLede')}</p>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
-                      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={locale === 'ar' ? 'الاسم' : 'Name'}
-                        className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]" />
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('emailLabel')}
-                        className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]" />
+                      <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder={locale === 'ar' ? 'الاسم الكامل' : t('nameLabel')}
+                        required
+                        className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
+                      />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t('emailLabel')}
+                        required
+                        className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
+                      />
                     </div>
-                    <Button onClick={sendResult} size="md" variant="gold" disabled={sending || !email} className="mt-4">
-                      {sending ? '...' : <>{t('send')} <Send className="h-3.5 w-3.5" /></>}
+                    <Button
+                      onClick={sendResult}
+                      size="md"
+                      variant="gold"
+                      disabled={sending || !email || !name}
+                      className="mt-4"
+                    >
+                      {sending ? t('sending') : <>{t('send')} <Send className="h-3.5 w-3.5" /></>}
                     </Button>
                   </div>
                 ) : (

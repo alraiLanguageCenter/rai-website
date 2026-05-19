@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { Facebook, Instagram, Youtube, MessageCircle, Users } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Logo } from '@/components/ui/Logo';
 import { SITE } from '@/lib/site';
 
@@ -17,6 +18,7 @@ export function Footer() {
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
   const locale = useLocale() as 'ar' | 'en';
+  const reduced = useReducedMotion();
   const year = new Date().getFullYear();
 
   const nav = [
@@ -30,19 +32,57 @@ export function Footer() {
   ];
 
   return (
-    <footer className="relative bg-[var(--color-rlc-900)] text-[var(--color-cream)]">
+    <footer className="relative overflow-hidden bg-[var(--color-rlc-900)] text-[var(--color-cream)]">
       <div className="grain opacity-[0.03]" aria-hidden />
-      <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-10">
+
+      {/* Animated gold gradient bar across the top edge */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(201,162,74,0) 25%, #E0BC65 50%, rgba(201,162,74,0) 75%, transparent 100%)',
+          backgroundSize: '200% 100%',
+        }}
+        animate={reduced ? undefined : { backgroundPosition: ['-100% 0', '200% 0'] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+      />
+
+      {/* Drifting blurred green/gold orbs */}
+      {!reduced && (
+        <>
+          <motion.span aria-hidden className="pointer-events-none absolute -start-32 top-10 h-80 w-80 rounded-full bg-[var(--color-gold)]/8 blur-3xl"
+            animate={{ y: [0, 20, 0], x: [0, 16, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
+          <motion.span aria-hidden className="pointer-events-none absolute -end-32 bottom-0 h-96 w-96 rounded-full bg-[var(--color-rlc-700)]/15 blur-3xl"
+            animate={{ y: [0, -24, 0], x: [0, -18, 0] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }} />
+        </>
+      )}
+
+      <div className="relative mx-auto w-full max-w-7xl px-6 py-20 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <Logo variant="dark" />
             <p className="mt-6 max-w-sm font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl">{t('tagline')}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              {SOCIAL.map(({ href, label, Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noreferrer noopener" aria-label={label}
-                   className="group inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-cream)]/10 transition hover:bg-[var(--color-gold)] hover:text-[var(--color-rlc-900)]">
+              {SOCIAL.map(({ href, label, Icon }, i) => (
+                <motion.a
+                  key={label}
+                  href={href} target="_blank" rel="noreferrer noopener" aria-label={label}
+                  whileHover={reduced ? undefined : { scale: 1.12, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+                  className="group relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-cream)]/10 text-[var(--color-cream)] transition-colors hover:bg-[var(--color-gold)] hover:text-[var(--color-rlc-900)]"
+                >
                   <Icon className="h-4 w-4" />
-                </a>
+                  {!reduced && (
+                    <motion.span
+                      aria-hidden
+                      className="absolute -inset-1 rounded-full border border-[var(--color-gold)]/40"
+                      animate={{ scale: [1, 1.18, 1], opacity: [0.55, 0, 0.55] }}
+                      transition={{ duration: 3.2 + i * 0.3, repeat: Infinity, ease: 'easeInOut', delay: i * 0.4 }}
+                    />
+                  )}
+                </motion.a>
               ))}
             </div>
           </div>
