@@ -357,22 +357,23 @@ function ScatteredBubbles({
 }) {
   // Three bubbles per cycle drawn from the greetings pool starting at `cycle`
   const picks = [0, 1, 2].map((k) => greetings[(cycle + k) % greetings.length]);
-  // Anchor positions (right-half area): each cycle rotates through 3 layouts
+  // Anchor positions: clustered in the middle-right area, all below the sticky header (>= 30% top),
+  // and tighter vertically so the three bubbles read as one conversation, not scattered ornaments.
   const LAYOUTS: { top: string; right: string; tone: 'green' | 'gold'; lang: 'en' | 'ar'; delay: number }[][] = [
     [
-      { top: '14%', right: '6%',  tone: 'green', lang: 'en', delay: 0 },
-      { top: '38%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0.2 },
-      { top: '68%', right: '4%',  tone: 'green', lang: 'en', delay: 0.4 },
+      { top: '32%', right: '8%',  tone: 'green', lang: 'en', delay: 0 },
+      { top: '46%', right: '15%', tone: 'gold',  lang: 'ar', delay: 0.2 },
+      { top: '60%', right: '6%',  tone: 'green', lang: 'en', delay: 0.4 },
     ],
     [
-      { top: '10%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0 },
-      { top: '46%', right: '4%',  tone: 'green', lang: 'en', delay: 0.2 },
-      { top: '74%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0.4 },
+      { top: '34%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0 },
+      { top: '50%', right: '6%',  tone: 'green', lang: 'en', delay: 0.2 },
+      { top: '64%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0.4 },
     ],
     [
-      { top: '22%', right: '4%',  tone: 'green', lang: 'en', delay: 0 },
+      { top: '36%', right: '6%',  tone: 'green', lang: 'en', delay: 0 },
       { top: '50%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0.2 },
-      { top: '78%', right: '6%',  tone: 'green', lang: 'en', delay: 0.4 },
+      { top: '64%', right: '8%',  tone: 'green', lang: 'en', delay: 0.4 },
     ],
   ];
   const layout = LAYOUTS[cycle % LAYOUTS.length];

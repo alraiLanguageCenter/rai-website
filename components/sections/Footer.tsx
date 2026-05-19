@@ -35,7 +35,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <div className="text-[var(--color-cream)]"><Logo /></div>
+            <Logo variant="dark" />
             <p className="mt-6 max-w-sm font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl">{t('tagline')}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {SOCIAL.map(({ href, label, Icon }) => (
