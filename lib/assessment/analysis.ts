@@ -10,8 +10,6 @@
  * are computed locally so the email always has consistent data.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-
 export type SkillTag = 'grammar' | 'vocab' | 'reading' | 'listening';
 
 export type AnsweredQuestion = {
@@ -224,7 +222,7 @@ function buildStudyPlan(level: string, skills: SkillScore[]): AnalysisOutput['st
 }
 
 /* ============================================================================
-   Narrative analysis — Claude w/ template fallback
+   Narrative analysis — DeepSeek (OpenAI-compatible) w/ template fallback
    ============================================================================ */
 
 function templateNarrative(input: AnalysisInput, skills: SkillScore[]) {
@@ -255,10 +253,9 @@ function templateNarrative(input: AnalysisInput, skills: SkillScore[]) {
 }
 
 async function aiNarrative(input: AnalysisInput, skills: SkillScore[]) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.DEEPSEEK_API_KEY;
   if (!key) return null;
   try {
-    const client = new Anthropic({ apiKey: key });
     const prompt = `You are an experienced English teacher at Rai Language Center in Latakia. A student has just completed an AI-graded placement assessment.
 
 Student: ${input.name}
@@ -272,7 +269,7 @@ Write:
 1. A warm, specific 2-sentence summary addressing the student by name.
 2. For each of the four competencies (Grammar, Vocabulary, Reading, Listening), a 2-sentence analysis and a 1-sentence specific practice recommendation.
 
-Reply ONLY in this exact JSON shape, no prose around it:
+Reply ONLY in JSON, no prose around it. Schema:
 {
   "summary": "...",
   "competencies": [
@@ -282,16 +279,32 @@ Reply ONLY in this exact JSON shape, no prose around it:
     { "skill": "listening", "analysis": "...", "recommendation": "..." }
   ]
 }`;
-    const resp = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: prompt }],
+
+    const resp = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: 'You return strictly valid JSON. No prose.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.4,
+        response_format: { type: 'json_object' },
+        max_tokens: 900,
+      }),
     });
-    const text = resp.content
-      .map((c) => (c.type === 'text' ? c.text : ''))
-      .join('')
-      .trim();
-    const match = text.match(/\{[\s\S]*\}/);
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => '');
+      console.warn('[deepseek] non-200', resp.status, t);
+      return null;
+    }
+    const json = (await resp.json()) as { choices?: { message?: { content?: string } }[] };
+    const content = json.choices?.[0]?.message?.content ?? '';
+    const match = content.match(/\{[\s\S]*\}/);
     if (!match) return null;
     const parsed = JSON.parse(match[0]) as {
       summary: string;

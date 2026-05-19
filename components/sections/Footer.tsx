@@ -62,7 +62,26 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <Logo variant="dark" />
-            <p className="mt-6 max-w-sm font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl">{t('tagline')}</p>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-6 max-w-sm font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl"
+            >
+              {(t('tagline').split('. ') as string[]).map((part, i, arr) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, x: i % 2 === 0 ? -10 : 10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ delay: 0.15 * i, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block"
+                >
+                  {part}{i < arr.length - 1 ? '. ' : ''}
+                </motion.span>
+              ))}
+            </motion.p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {SOCIAL.map(({ href, label, Icon }, i) => (
                 <motion.a

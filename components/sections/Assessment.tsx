@@ -35,6 +35,7 @@ export function Assessment() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -96,13 +97,13 @@ export function Assessment() {
     }).catch(() => {});
   }
   async function sendResult() {
-    if (!email || !level) return;
+    if (!email || !name || !phone || !level) return;
     setSending(true);
     try {
       const res = await fetch('/api/assessment/submit', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          email, name, locale, level: level.code, score,
+          email, name, phone, locale, level: level.code, score,
           answers: answers.map((selectedIndex, i) => ({
             questionId: questions![i].id, selectedIndex, correct: selectedIndex === questions![i].correct_idx, skillTag: questions![i].skill_tag ?? '',
           })),
@@ -210,22 +211,49 @@ export function Assessment() {
             <motion.div key="result" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="grid gap-10 lg:grid-cols-2">
+              {/* Left column: level result with a polished thumbnail-style badge */}
               <div>
                 <div className="text-[0.7rem] uppercase tracking-[0.16em] text-[var(--color-gold)]">{t('resultTitle')}</div>
-                <motion.div initial={{ scale: 0.7 }} animate={{ scale: 1 }} transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                  className="mt-3 font-[var(--font-display)] text-[6rem] leading-none text-[var(--color-rlc-900)] lg:text-[7rem]">
-                  {level.code}
-                </motion.div>
-                <div className="mt-2 text-lg text-[var(--color-ink-soft)]">
-                  {locale === 'ar' ? level.label_ar : level.label_en}
+
+                <div className="mt-5 flex items-center gap-5">
+                  {/* Polished thumbnail: level badge with RLC logo + animated rim */}
+                  <motion.div
+                    initial={{ scale: 0.6, rotate: -15, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    transition={{ delay: 0.05, type: 'spring', stiffness: 160, damping: 16 }}
+                    className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[var(--color-rlc-700)] to-[var(--color-rlc-900)] shadow-[0_14px_34px_-12px_rgba(8,57,34,0.55)] ring-2 ring-[var(--color-gold)]"
+                  >
+                    <div className="absolute inset-0 grid place-items-center">
+                      <span className="font-[var(--font-display)] text-4xl font-semibold text-[var(--color-gold)]">{level.code}</span>
+                    </div>
+                    <motion.span
+                      aria-hidden
+                      className="absolute -inset-1 rounded-full border border-[var(--color-gold)]/60"
+                      animate={{ scale: [1, 1.13, 1], opacity: [0.6, 0, 0.6] }}
+                      transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  </motion.div>
+                  <div>
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="font-[var(--font-display)] text-5xl leading-none text-[var(--color-rlc-900)]"
+                    >
+                      {locale === 'ar' ? level.label_ar : level.label_en}
+                    </motion.div>
+                    <div className="mt-2 text-sm text-[var(--color-ink-soft)]">
+                      {locale === 'ar' ? `النتيجة: ${score} / ${total}` : `Score: ${score} / ${total}`}
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-6 text-sm text-[var(--color-ink-soft)]">
-                  {locale === 'ar' ? `النتيجة: ${score} / ${total}` : `Score: ${score} / ${total}`}
-                </div>
+
                 <button onClick={restart} className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--color-rlc-800)] hover:text-[var(--color-gold)]">
                   <RefreshCw className="h-4 w-4" /> {t('restart')}
                 </button>
               </div>
+
+              {/* Right column: book recs + capture form (name / email / phone) */}
               <div>
                 <div className="text-[0.7rem] uppercase tracking-[0.16em] text-[var(--color-gold)]">{t('recommendedBooks')}</div>
                 <ul className="mt-3 space-y-2">
@@ -260,14 +288,24 @@ export function Assessment() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t('emailLabel')}
                         required
+                        dir="ltr"
                         className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
+                      />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder={t('phoneLabel')}
+                        required
+                        dir="ltr"
+                        className="w-full rounded-sm border-0 bg-[var(--color-cream)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)] md:col-span-2"
                       />
                     </div>
                     <Button
                       onClick={sendResult}
                       size="md"
                       variant="gold"
-                      disabled={sending || !email || !name}
+                      disabled={sending || !email || !name || !phone}
                       className="mt-4"
                     >
                       {sending ? t('sending') : <>{t('send')} <Send className="h-3.5 w-3.5" /></>}

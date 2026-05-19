@@ -15,6 +15,7 @@
     "book": "Book Assessment",
     "contact": "Contact",
     "bookSession": "Book a session",
+    "login": "Login",
     "switchTo": "العربية"
   },
   "hero": {
@@ -41,7 +42,15 @@
       { "en": "How are you?",          "ar": "كيف حالك؟" },
       { "en": "Good morning!",         "ar": "صباح الخير!" },
       { "en": "Speak with me.",        "ar": "تحدّث معي." },
-      { "en": "Yes, you can.",         "ar": "نعم، تستطيع." }
+      { "en": "Yes, you can.",         "ar": "نعم، تستطيع." },
+      { "en": "Tell me more.",         "ar": "أخبرني المزيد." },
+      { "en": "Don't be afraid.",      "ar": "لا تخف." },
+      { "en": "I understand.",         "ar": "أفهم ذلك." },
+      { "en": "Try again.",            "ar": "حاول مرة أخرى." },
+      { "en": "You're doing great.",   "ar": "أداؤك رائع." },
+      { "en": "Practice makes perfect.","ar": "الممارسة تصنع الكمال." },
+      { "en": "Are you ready?",        "ar": "هل أنت جاهز؟" },
+      { "en": "Open a new door.",      "ar": "افتح باباً جديداً." }
     ],
     "floatingWords": [
       "Hello",       "Speak",       "Listen",      "Read",         "Write",
@@ -165,6 +174,7 @@
     "captureLede": "Enter your details. Our team will receive your full AI-graded report — including the four-skill analysis, study plan, and recommended courses — and contact you with personalised next steps.",
     "nameLabel": "Full name",
     "emailLabel": "Email",
+    "phoneLabel": "Phone (WhatsApp)",
     "send": "Send to the center",
     "sent": "Sent! Our team will review your AI analysis and reach out to you soon.",
     "sending": "Generating your AI analysis...",

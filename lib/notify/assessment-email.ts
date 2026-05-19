@@ -28,6 +28,7 @@ function escapeHtml(s: string) {
 export async function sendAssessmentReport(opts: {
   to: string;
   name: string;
+  phone?: string;
   locale: 'ar' | 'en';
   analysis: AnalysisOutput;
 }) {
@@ -71,10 +72,20 @@ export async function sendAssessmentReport(opts: {
     <p style="margin:0 0 22px;font-size:16px;color:${COLORS.inkSoft};line-height:1.65">${escapeHtml(a.summary)}</p>`;
 
   // -- Level + score block --
+  // -- Candidate info card (admin-facing: name / email / phone right at the top) --
+  const candidateBlock = `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:8px 0 20px">
+      <tr><td style="padding:14px 18px;background:${COLORS.ivory};border-${isAr ? 'right' : 'left'}:3px solid ${COLORS.gold};border-radius:8px" align="${isAr ? 'right' : 'left'}">
+        <p style="margin:0;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:${COLORS.green700}">${isAr ? 'بيانات المتقدّم' : 'Candidate'}</p>
+        <p style="margin:6px 0 0;font-size:16px;font-weight:600;color:${COLORS.green900}">${escapeHtml(opts.name)}</p>
+        <p style="margin:2px 0 0;font-size:13px;color:${COLORS.inkSoft}" dir="ltr"><a href="mailto:${escapeHtml(opts.to)}" style="color:${COLORS.green800};text-decoration:none">${escapeHtml(opts.to)}</a>${opts.phone ? ` &nbsp;·&nbsp; <a href="tel:${escapeHtml(opts.phone.replace(/[^+0-9]/g, ''))}" style="color:${COLORS.green800};text-decoration:none">${escapeHtml(opts.phone)}</a>` : ''}</p>
+      </td></tr>
+    </table>`;
+
   const levelBlock = `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:16px 0 28px">
       <tr><td align="center" style="padding:22px;background:${COLORS.green900};border-radius:12px">
-        <p style="margin:0;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:${COLORS.goldSoft}">${isAr ? 'مستواك' : 'Your CEFR Level'}</p>
+        <p style="margin:0;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:${COLORS.goldSoft}">${isAr ? 'المستوى' : 'CEFR Level'}</p>
         <p style="margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:64px;line-height:1;color:${COLORS.gold}">${escapeHtml(a.level)}</p>
         <p style="margin:10px 0 0;color:${COLORS.cream};font-size:14px;opacity:0.85">${a.score} / ${a.total} ${isAr ? 'نقطة' : 'points'}</p>
       </td></tr>
@@ -161,6 +172,7 @@ export async function sendAssessmentReport(opts: {
         ${header}
         <tr><td style="padding:36px 36px 28px" align="${isAr ? 'right' : 'left'}">
           ${greeting}
+          ${candidateBlock}
           ${levelBlock}
           ${radarBlock}
           ${competencyBlock}
@@ -174,7 +186,8 @@ export async function sendAssessmentReport(opts: {
 </body>
 </html>`;
 
-  const text = `${opts.name},
+  const text = `Candidate: ${opts.name}
+Email: ${opts.to}${opts.phone ? `\nPhone: ${opts.phone}` : ''}
 
 ${a.summary}
 
@@ -193,7 +206,7 @@ ${SITE_URL}`;
   // The report goes ONLY to the center inbox (admin) for review.
   // The candidate's contact info is in the subject line + first paragraph of
   // the email so admin can follow up directly.
-  const adminSubject = `AI Assessment Report — ${opts.name} (${a.level}) · ${opts.to}`;
+  const adminSubject = `AI Assessment · ${opts.name} · ${a.level} · ${opts.to}${opts.phone ? ` · ${opts.phone}` : ''}`;
 
   const { error } = await resend.emails.send({
     from: FROM,

@@ -7,6 +7,7 @@ import { sendAssessmentReport } from '@/lib/notify/assessment-email';
 const inputSchema = z.object({
   name: z.string().optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
   ageGroup: z.enum(['child', 'teen', 'adult', 'professional']).optional(),
   locale: z.enum(['ar', 'en']),
   level: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
@@ -79,11 +80,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 
-  // Send the branded report to candidate (+ BCC admin)
+  // Send the branded report to admin
   try {
     const res = await sendAssessmentReport({
       to: d.email,
       name: d.name || (d.locale === 'ar' ? 'الطالب' : 'Student'),
+      phone: d.phone || '',
       locale: d.locale,
       analysis,
     });

@@ -344,8 +344,12 @@ function FloatingWords({ words }: { words: string[] }) {
 }
 
 /**
- * Three small speech bubbles placed at randomised positions across the right half
- * of the hero. They re-place themselves each cycle so the screen never feels static.
+ * Three speech bubbles placed at scattered positions on the "end" side
+ * (visually right in LTR, left in RTL). Each cycle:
+ *  - picks 3 different greetings, never repeating any from the previous cycle
+ *  - mixes EN/AR languages randomly so the conversation feels natural
+ *  - mixes green/gold tones
+ *  - rotates one of 4 layout patterns so the position changes too
  */
 function ScatteredBubbles({
   greetings,
@@ -354,25 +358,53 @@ function ScatteredBubbles({
   greetings: { en: string; ar: string }[];
   cycle: number;
 }) {
-  // Three bubbles per cycle drawn from the greetings pool starting at `cycle`
-  const picks = [0, 1, 2].map((k) => greetings[(cycle + k) % greetings.length]);
-  // Anchor positions: clustered in the middle-right area, all below the sticky header (>= 30% top),
-  // and tighter vertically so the three bubbles read as one conversation, not scattered ornaments.
-  const LAYOUTS: { top: string; right: string; tone: 'green' | 'gold'; lang: 'en' | 'ar'; delay: number }[][] = [
+  // Track which greetings were used in the previous cycle so we never repeat them
+  const lastUsedRef = useRef<Set<number>>(new Set());
+
+  // Deterministic pseudo-random by cycle so renders are stable
+  function rng(seed: number) {
+    let x = Math.sin(seed) * 10000;
+    return () => {
+      x = Math.sin(x) * 10000;
+      return x - Math.floor(x);
+    };
+  }
+  const r = rng(cycle * 7 + 13);
+
+  // Pick 3 greetings that weren't used last cycle
+  const available = greetings
+    .map((g, i) => ({ g, i }))
+    .filter((p) => !lastUsedRef.current.has(p.i));
+  const pool = available.length >= 3 ? available : greetings.map((g, i) => ({ g, i }));
+  const shuffled = [...pool].sort(() => r() - 0.5);
+  const picks = shuffled.slice(0, 3);
+  lastUsedRef.current = new Set(picks.map((p) => p.i));
+
+  // Mix languages and tones each cycle (different pattern per cycle)
+  const langPattern: ('en' | 'ar')[] = r() > 0.5 ? ['en', 'ar', 'en'] : ['ar', 'en', 'ar'];
+  const tonePattern: ('green' | 'gold')[] = r() > 0.5 ? ['green', 'gold', 'green'] : ['gold', 'green', 'gold'];
+
+  // 4 layout patterns; uses logical end-positioning so RTL flips automatically
+  const LAYOUTS: { top: string; end: string; delay: number }[][] = [
     [
-      { top: '32%', right: '8%',  tone: 'green', lang: 'en', delay: 0 },
-      { top: '46%', right: '15%', tone: 'gold',  lang: 'ar', delay: 0.2 },
-      { top: '60%', right: '6%',  tone: 'green', lang: 'en', delay: 0.4 },
+      { top: '32%', end: '6%',  delay: 0 },
+      { top: '46%', end: '16%', delay: 0.18 },
+      { top: '60%', end: '5%',  delay: 0.36 },
     ],
     [
-      { top: '34%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0 },
-      { top: '50%', right: '6%',  tone: 'green', lang: 'en', delay: 0.2 },
-      { top: '64%', right: '12%', tone: 'gold',  lang: 'ar', delay: 0.4 },
+      { top: '34%', end: '16%', delay: 0 },
+      { top: '50%', end: '5%',  delay: 0.18 },
+      { top: '64%', end: '12%', delay: 0.36 },
     ],
     [
-      { top: '36%', right: '6%',  tone: 'green', lang: 'en', delay: 0 },
-      { top: '50%', right: '14%', tone: 'gold',  lang: 'ar', delay: 0.2 },
-      { top: '64%', right: '8%',  tone: 'green', lang: 'en', delay: 0.4 },
+      { top: '36%', end: '5%',  delay: 0 },
+      { top: '50%', end: '15%', delay: 0.18 },
+      { top: '62%', end: '7%',  delay: 0.36 },
+    ],
+    [
+      { top: '38%', end: '12%', delay: 0 },
+      { top: '52%', end: '4%',  delay: 0.18 },
+      { top: '66%', end: '14%', delay: 0.36 },
     ],
   ];
   const layout = LAYOUTS[cycle % LAYOUTS.length];
@@ -388,10 +420,10 @@ function ScatteredBubbles({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.7, delay: spot.delay, ease: [0.22, 1, 0.36, 1] }}
             className="absolute"
-            style={{ top: spot.top, right: spot.right }}
+            style={{ top: spot.top, insetInlineEnd: spot.end }}
           >
-            <SpeechBubble side="right" tone={spot.tone}>
-              {spot.lang === 'en' ? picks[i].en : picks[i].ar}
+            <SpeechBubble side="right" tone={tonePattern[i] ?? 'green'}>
+              {langPattern[i] === 'en' ? picks[i]?.g.en : picks[i]?.g.ar}
             </SpeechBubble>
           </motion.div>
         ))}
