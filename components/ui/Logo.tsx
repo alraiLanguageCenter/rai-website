@@ -35,10 +35,14 @@ export function Logo({
         <Image
           src="/brand/rlc-logo-transparent.png"
           alt="Rai Language Center"
-          width={144}
-          height={144}
+          width={192}
+          height={192}
           priority
-          className={`object-contain ${isDark ? 'h-16 w-16 lg:h-20 lg:w-20' : 'h-20 w-20 lg:h-24 lg:w-24'}`}
+          /* Light variant lives in the header — bumped a step up so the
+             mark reads clearly on the cream backdrop. Dark variant stays
+             a step smaller because the footer already has plenty of room
+             from the tagline + columns next to it. */
+          className={`object-contain ${isDark ? 'h-16 w-16 lg:h-20 lg:w-20' : 'h-24 w-24 lg:h-28 lg:w-28'}`}
         />
       </motion.div>
       {withText && (
