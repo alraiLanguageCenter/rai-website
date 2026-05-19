@@ -101,7 +101,7 @@ export function Journey() {
             <span className="font-[var(--font-display)] italic text-[var(--color-gold)] text-2xl lg:text-3xl">{t('start')}</span>
           </div>
 
-          <div className="relative grid grid-cols-12 gap-y-16 lg:gap-y-28" style={{ minHeight: 'min(1300px, 140vh)' }}>
+          <div className="relative grid grid-cols-12 gap-y-12 sm:gap-y-16 lg:gap-y-28 min-h-[1100px] md:min-h-[1300px]">
             {steps.map((s, i) => {
               const Icon = ICONS[i];
               const colSpan = 'col-span-12 md:col-span-7';
@@ -159,7 +159,7 @@ export function Journey() {
 
                   <motion.span
                     aria-hidden
-                    className="pointer-events-none absolute h-3 w-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_0_4px_rgba(201,162,74,0.25)]"
+                    className="pointer-events-none absolute hidden h-3 w-3 rounded-full bg-[var(--color-gold)] shadow-[0_0_0_4px_rgba(201,162,74,0.25)] md:block"
                     style={{
                       left: i % 2 === 0 ? 'auto' : '-1.25rem',
                       right: i % 2 === 0 ? '-1.25rem' : 'auto',

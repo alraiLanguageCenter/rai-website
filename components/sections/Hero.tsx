@@ -138,21 +138,28 @@ export function Hero() {
         {locale === 'ar' ? 'A' : 'ع'}
       </motion.div>
 
-      {/* Layer 6: Floating English words drifting through space */}
+      {/* Layer 6: Floating English words drifting through space.
+          Hidden on small screens — they crowd narrow viewports. */}
       {!reduced && (
-        <FloatingWords words={words} />
+        <div className="hidden md:block">
+          <FloatingWords words={words} />
+        </div>
       )}
 
-      {/* Layer 7: Floating language icons */}
-      {!reduced && <FloatingIcons />}
+      {/* Layer 7: Floating language icons (md+ only). */}
+      {!reduced && (
+        <div className="hidden md:block">
+          <FloatingIcons />
+        </div>
+      )}
 
-      {/* Layer 8: Gold particles */}
+      {/* Layer 8: Gold particles — fewer on small screens. */}
       {!reduced &&
         Array.from({ length: 14 }).map((_, i) => (
           <motion.span
             key={i}
             aria-hidden
-            className="absolute h-1 w-1 rounded-full bg-[var(--color-gold)]"
+            className={`absolute h-1 w-1 rounded-full bg-[var(--color-gold)] ${i >= 6 ? 'hidden sm:block' : ''}`}
             style={{ top: `${(i * 73) % 100}%`, left: `${(i * 47) % 100}%`, opacity: 0.35 }}
             animate={{ y: [0, -20, 0], opacity: [0.15, 0.5, 0.15] }}
             transition={{ duration: 4 + (i % 5), repeat: Infinity, delay: i * 0.3, ease: 'easeInOut' }}
@@ -172,7 +179,7 @@ export function Hero() {
           rotateY: reduced ? 0 : tiltY,
           transformPerspective: 1200,
         }}
-        className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-28 pb-20 lg:px-10 lg:pt-32"
+        className="relative z-10 mx-auto w-full max-w-7xl px-5 pt-24 pb-16 sm:px-6 sm:pt-28 sm:pb-20 lg:px-10 lg:pt-32"
       >
         <motion.span
           initial={{ opacity: 0, y: 12 }}

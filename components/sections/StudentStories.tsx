@@ -248,21 +248,21 @@ function StoriesBackdrop({ reduced }: { reduced: boolean }) {
 
 function WinCardPreview({ win }: { win: Win }) {
   return (
-    <article className="group relative h-full overflow-hidden rounded-sm bg-[var(--color-cream)] p-7 ring-1 ring-[var(--color-line)]">
-      <div className={`absolute end-0 top-0 h-28 w-28 -translate-y-1/2 translate-x-1/2 rounded-full ${win.accent === 'gold' ? 'bg-[var(--color-gold)]/22' : 'bg-[var(--color-rlc-700)]/22'}`} />
+    <article className="group relative h-full overflow-hidden rounded-sm bg-[var(--color-cream)] p-5 ring-1 ring-[var(--color-line)] sm:p-7">
+      <div className={`absolute end-0 top-0 h-24 w-24 -translate-y-1/2 translate-x-1/2 rounded-full sm:h-28 sm:w-28 ${win.accent === 'gold' ? 'bg-[var(--color-gold)]/22' : 'bg-[var(--color-rlc-700)]/22'}`} />
       <div className="relative flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-rlc-900)] font-[var(--font-display)] text-[var(--color-gold)]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-rlc-900)] font-[var(--font-display)] text-[var(--color-gold)] sm:h-12 sm:w-12">
           {win.initials}
         </div>
-        <div>
-          <div className="font-[var(--font-display)] text-lg text-[var(--color-rlc-900)]">{win.name}</div>
-          <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">{win.role}</div>
+        <div className="min-w-0">
+          <div className="truncate font-[var(--font-display)] text-base text-[var(--color-rlc-900)] sm:text-lg">{win.name}</div>
+          <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--color-ink-soft)] sm:text-xs">{win.role}</div>
         </div>
-        <Trophy className="ms-auto h-4 w-4 text-[var(--color-gold)]" />
+        <Trophy className="ms-auto h-4 w-4 shrink-0 text-[var(--color-gold)]" />
       </div>
-      <p className="relative mt-6 body-lg text-[var(--color-ink)]">“{win.quote}”</p>
+      <p className="relative mt-4 text-base leading-relaxed text-[var(--color-ink)] sm:mt-6 sm:text-lg">“{win.quote}”</p>
       {win.meta && (
-        <div className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-100)] px-3 py-1 text-xs text-[var(--color-rlc-800)]">
+        <div className="relative mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-100)] px-3 py-1 text-xs text-[var(--color-rlc-800)] sm:mt-6">
           {win.meta}
         </div>
       )}
@@ -273,16 +273,16 @@ function WinCardPreview({ win }: { win: Win }) {
 function VoiceCardPreview({ t }: { t: Testimonial }) {
   const initials = t.name.split(/\s+/).map((p) => p[0]).slice(0, 2).join('');
   return (
-    <article className="group relative h-full overflow-hidden rounded-sm bg-[var(--color-rlc-800)] p-7 text-[var(--color-cream)] ring-1 ring-[var(--color-cream)]/15">
-      <Quote className="h-7 w-7 text-[var(--color-gold)]" />
-      <p className="mt-5 body-lg leading-relaxed text-[var(--color-cream)]/95">“{t.quote}”</p>
-      <div className="mt-8 flex items-center gap-4 border-t border-[var(--color-cream)]/15 pt-6">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-cream)] font-[var(--font-display)] text-[var(--color-rlc-900)]">
+    <article className="group relative h-full overflow-hidden rounded-sm bg-[var(--color-rlc-800)] p-5 text-[var(--color-cream)] ring-1 ring-[var(--color-cream)]/15 sm:p-7">
+      <Quote className="h-6 w-6 text-[var(--color-gold)] sm:h-7 sm:w-7" />
+      <p className="mt-4 text-base leading-relaxed text-[var(--color-cream)]/95 sm:mt-5 sm:text-lg">“{t.quote}”</p>
+      <div className="mt-6 flex items-center gap-3 border-t border-[var(--color-cream)]/15 pt-5 sm:mt-8 sm:gap-4 sm:pt-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-cream)] font-[var(--font-display)] text-[var(--color-rlc-900)] sm:h-12 sm:w-12">
           {initials}
         </div>
-        <div>
-          <div className="font-[var(--font-display)] text-lg">{t.name}</div>
-          <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-cream)]/65">{t.course}</div>
+        <div className="min-w-0">
+          <div className="truncate font-[var(--font-display)] text-base sm:text-lg">{t.name}</div>
+          <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--color-cream)]/65 sm:text-xs">{t.course}</div>
         </div>
       </div>
     </article>
@@ -332,7 +332,7 @@ function BigTrigger({
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduced ? undefined : { scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="group relative overflow-hidden rounded-2xl bg-[var(--color-cream)] px-8 py-6 text-start text-[var(--color-rlc-900)] shadow-[0_30px_70px_-25px_rgba(0,0,0,0.6)] ring-1 ring-[var(--color-cream)]/30 sm:px-12 sm:py-7"
+      className="group relative w-full max-w-2xl overflow-hidden rounded-2xl bg-[var(--color-cream)] px-5 py-5 text-start text-[var(--color-rlc-900)] shadow-[0_30px_70px_-25px_rgba(0,0,0,0.6)] ring-1 ring-[var(--color-cream)]/30 sm:max-w-none sm:px-12 sm:py-7"
     >
       {/* Pulsing rings */}
       {!reduced && (
@@ -356,28 +356,28 @@ function BigTrigger({
         />
       )}
 
-      <div className="relative flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-8">
-        <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--color-rlc-800)] text-[var(--color-gold)]">
+      <div className="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8">
+        <div className="flex w-full items-center gap-3 sm:w-auto">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--color-rlc-800)] text-[var(--color-gold)] sm:h-12 sm:w-12">
             <BookOpen className="h-5 w-5" />
           </span>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">
               {locale === 'ar' ? 'الجدار الكامل' : 'The full wall'}
             </div>
-            <div className="mt-0.5 font-[var(--font-display)] text-xl text-[var(--color-rlc-900)] sm:text-2xl">{label}</div>
+            <div className="mt-0.5 font-[var(--font-display)] text-lg leading-tight text-[var(--color-rlc-900)] sm:text-2xl">{label}</div>
           </div>
         </div>
 
-        <div className="ms-auto flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-rlc-100)] px-3 py-1.5 text-xs font-medium text-[var(--color-rlc-800)]">
-            <Trophy className="h-3.5 w-3.5" /> {countWins} {locale === 'ar' ? 'إنجاز' : 'wins'}
+        <div className="flex w-full flex-wrap items-center gap-2 sm:ms-auto sm:w-auto">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-rlc-100)] px-2.5 py-1 text-[0.7rem] font-medium text-[var(--color-rlc-800)] sm:px-3 sm:py-1.5 sm:text-xs">
+            <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {countWins} {locale === 'ar' ? 'إنجاز' : 'wins'}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-gold)]/20 px-3 py-1.5 text-xs font-medium text-[var(--color-rlc-800)]">
-            <Quote className="h-3.5 w-3.5" /> {countVoices} {locale === 'ar' ? 'شهادة' : 'voices'}
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-gold)]/20 px-2.5 py-1 text-[0.7rem] font-medium text-[var(--color-rlc-800)] sm:px-3 sm:py-1.5 sm:text-xs">
+            <Quote className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {countVoices} {locale === 'ar' ? 'شهادة' : 'voices'}
           </span>
           <motion.span
-            className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-rlc-800)] px-4 py-2 text-xs font-semibold text-[var(--color-cream)]"
+            className="ms-auto inline-flex items-center gap-1.5 rounded-full bg-[var(--color-rlc-800)] px-3.5 py-2 text-xs font-semibold text-[var(--color-cream)] sm:ms-0 sm:px-4"
             whileHover={{ x: 4 }}
           >
             <Sparkles className="h-3.5 w-3.5" />
@@ -422,28 +422,28 @@ function StoriesArchive({
         exit={{ opacity: 0, y: 20, scale: 0.97 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
-        className="relative flex w-full max-w-6xl flex-col overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] sm:max-h-[88vh]"
+        className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] sm:max-h-[88vh]"
       >
         {/* Header */}
-        <div className="relative flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-ivory)] px-6 py-4">
-          <div>
-            <div className="text-[0.7rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">
+        <div className="relative flex items-center justify-between gap-3 border-b border-[var(--color-line)] bg-[var(--color-ivory)] px-4 py-3 sm:px-6 sm:py-4">
+          <div className="min-w-0">
+            <div className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)] sm:text-[0.7rem]">
               {locale === 'ar' ? 'جدار راي' : "Rai's wall"}
             </div>
-            <h3 className="mt-0.5 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)]">
+            <h3 className="mt-0.5 font-[var(--font-display)] text-lg text-[var(--color-rlc-900)] sm:text-2xl">
               {locale === 'ar' ? 'انتصارات وشهادات الطلاب' : 'Student wins & testimonials'}
             </h3>
           </div>
           <button
             onClick={onClose} aria-label="Close"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-cream)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-cream)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-[var(--color-line)] bg-[var(--color-cream)] px-6 py-3">
+        <div className="flex gap-2 border-b border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 sm:px-6">
           <TabBtn active={tab === 'wins'} onClick={() => setTab('wins')}>
             <Trophy className="h-3.5 w-3.5" /> {labels.wins} <span className="opacity-60">({wins.length})</span>
           </TabBtn>
@@ -453,7 +453,7 @@ function StoriesArchive({
         </div>
 
         {/* Body */}
-        <div className="grow overflow-y-auto bg-[var(--color-cream)] px-6 py-8 sm:px-8">
+        <div className="grow overflow-y-auto bg-[var(--color-cream)] px-4 py-6 sm:px-8 sm:py-8">
           <AnimatePresence mode="wait">
             {tab === 'wins' ? (
               <motion.div

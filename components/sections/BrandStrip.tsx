@@ -41,7 +41,7 @@ export function BrandStrip() {
     <section
       ref={ref}
       onMouseMove={onMove}
-      className="relative isolate overflow-hidden bg-[var(--color-rlc-900)] py-20 lg:py-28 text-[var(--color-cream)]"
+      className="relative isolate overflow-hidden bg-[var(--color-rlc-900)] py-14 sm:py-20 lg:py-28 text-[var(--color-cream)]"
     >
       {/* Layer 1: cursor-following golden spotlight */}
       <motion.div
@@ -56,24 +56,27 @@ export function BrandStrip() {
         }}
       />
 
-      {/* Layer 2: drifting alphabet glyphs in the background */}
+      {/* Layer 2: drifting alphabet glyphs in the background.
+          Sizes are clamped so the largest glyphs don't dominate the band on phones. */}
       {!reduced && (
         <motion.div aria-hidden style={{ y: bgY }} className="pointer-events-none absolute inset-0">
           {BG_GLYPHS.map((g, i) => {
             const top = 8 + ((i * 19) % 80);
             const left = 4 + ((i * 31) % 92);
-            const size = 2.2 + ((i * 13) % 40) / 10; // 2.2rem–6.1rem
+            const size = 2.2 + ((i * 13) % 40) / 10; // 2.2rem–6.1rem at md+
             const dur = 12 + (i % 7);
             const delay = (i * 0.7) % 6;
             const tone = i % 3 === 0 ? 'text-[var(--color-gold)]/30' : 'text-[var(--color-cream)]/[0.08]';
+            // On phones, drop every other glyph and clamp size to keep the band airy.
+            const hideOnMobile = i % 2 === 0 ? '' : 'hidden md:block';
             return (
               <motion.span
                 key={`${g}-${i}`}
-                className={`absolute select-none font-[var(--font-display)] ${tone}`}
+                className={`absolute select-none font-[var(--font-display)] ${tone} ${hideOnMobile}`}
                 style={{
                   top: `${top}%`,
                   left: `${left}%`,
-                  fontSize: `${size}rem`,
+                  fontSize: `clamp(1.4rem, ${size * 0.45}rem + 1.4vw, ${size}rem)`,
                   fontStyle: i % 2 ? 'italic' : undefined,
                 }}
                 initial={{ opacity: 0, y: 20, rotate: -6 + (i % 5) * 2 }}
@@ -126,13 +129,13 @@ export function BrandStrip() {
         />
       </svg>
 
-      {/* Layer 4: orbiting gold particles */}
+      {/* Layer 4: orbiting gold particles — show 8 on mobile, all 18 on md+. */}
       {!reduced && (
         <div aria-hidden className="pointer-events-none absolute inset-0">
           {Array.from({ length: 18 }).map((_, i) => (
             <motion.span
               key={i}
-              className="absolute h-1 w-1 rounded-full bg-[var(--color-gold)]"
+              className={`absolute h-1 w-1 rounded-full bg-[var(--color-gold)] ${i >= 8 ? 'hidden md:block' : ''}`}
               style={{ top: `${(i * 53) % 100}%`, left: `${(i * 37) % 100}%`, opacity: 0.55 }}
               animate={{
                 y: [0, -16, 0],
@@ -148,9 +151,9 @@ export function BrandStrip() {
       {/* Layer 5: content */}
       <motion.div
         style={{ x }}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center gap-6 px-6 lg:px-10"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center gap-5 px-5 sm:gap-6 sm:px-6 lg:px-10"
       >
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 lg:gap-x-16">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-8 sm:gap-y-3 lg:gap-x-16">
           {words.map((word, i) => (
             <KineticWord key={i} word={word} index={i} showDot={i < 2} reduced={!!reduced} />
           ))}

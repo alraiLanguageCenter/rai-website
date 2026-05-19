@@ -576,7 +576,7 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-[var(--color-ink)]/75 p-4 backdrop-blur-md sm:p-6"
+      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-[var(--color-ink)]/75 px-3 py-6 backdrop-blur-md sm:items-center sm:p-6"
       onClick={onClose}
       role="dialog" aria-modal="true"
     >
@@ -587,13 +587,15 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
         transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
         style={{ perspective: 2200, transformStyle: 'preserve-3d' }}
-        className="relative w-full max-w-5xl"
+        className="relative my-auto w-full max-w-5xl"
       >
-        {/* Floating close button */}
+        {/* Floating close button. Anchored to the top of the modal viewport on
+            mobile (sticky to body of motion.div) so it stays reachable while the
+            user scrolls the stacked book. */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute -top-3 end-0 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-cream)] text-[var(--color-rlc-900)] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-ivory)]"
+          className="fixed end-4 top-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-cream)] text-[var(--color-rlc-900)] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-ivory)] sm:absolute sm:-top-3 sm:end-0 sm:h-10 sm:w-10"
         >
           <X className="h-4 w-4" />
         </button>
@@ -603,21 +605,17 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
           {/* Cast shadow under the book */}
           <span aria-hidden className="pointer-events-none absolute -inset-x-8 -bottom-6 h-12 rounded-[50%] bg-black/40 blur-2xl" />
 
-          {/* The "book" — two-panel layout */}
+          {/* The "book" — two-panel layout on md+, stacks vertically on mobile so
+              every course title and brief is readable without horizontal scroll. */}
           <div
-            className="relative grid overflow-hidden rounded-md shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(0,0,0,0.05)]"
-            style={{
-              gridTemplateColumns: 'minmax(0,11fr) minmax(0,14fr)',
-              backgroundColor: 'var(--color-cream)',
-              transformStyle: 'preserve-3d',
-            }}
+            className="relative grid overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(0,0,0,0.05)] md:[grid-template-columns:minmax(0,11fr)_minmax(0,14fr)]"
+            style={{ transformStyle: 'preserve-3d' }}
           >
             {/* === LEFT PAGE: cover-ish — language flag, motto, TOC === */}
             <div
-              className="relative flex flex-col justify-between bg-gradient-to-br from-[var(--color-rlc-900)] via-[var(--color-rlc-800)] to-[var(--color-rlc-900)] p-8 text-[var(--color-cream)] sm:p-10"
+              className="relative flex min-h-[280px] flex-col justify-between bg-gradient-to-br from-[var(--color-rlc-900)] via-[var(--color-rlc-800)] to-[var(--color-rlc-900)] p-6 text-[var(--color-cream)] sm:p-10 md:min-h-[540px]"
               style={{
-                boxShadow: 'inset -22px 0 32px -28px rgba(0,0,0,0.7)',
-                minHeight: 540,
+                boxShadow: 'inset 0 -22px 32px -28px rgba(0,0,0,0.7)',
               }}
             >
               {/* gold corner accent */}
@@ -639,21 +637,23 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="mt-10"
+                    className="mt-6 md:mt-10"
                   >
-                    <div className="text-7xl leading-none">{lang.flag}</div>
-                    <h3 className="mt-6 font-[var(--font-display)] text-4xl text-[var(--color-cream)] sm:text-5xl">
+                    <div className="text-5xl leading-none sm:text-7xl">{lang.flag}</div>
+                    <h3 className="mt-4 font-[var(--font-display)] text-3xl text-[var(--color-cream)] sm:text-5xl md:mt-6">
                       {lang.name[locale]}
                     </h3>
-                    <p className="mt-4 max-w-xs text-sm italic text-[var(--color-cream)]/80">
+                    <p className="mt-3 max-w-xs text-sm italic text-[var(--color-cream)]/80 md:mt-4">
                       {lang.motto[locale]}
                     </p>
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              {/* TOC: jump to language */}
-              <div className="relative mt-10">
+              {/* TOC: jump to language. Hidden below md (the chip row at the bottom of
+                  the page already lets the user navigate, and the cover area on
+                  mobile is kept compact). */}
+              <div className="relative mt-8 hidden md:block">
                 <div className="text-[0.65rem] uppercase tracking-[0.16em] text-[var(--color-cream)]/60">
                   {locale === 'ar' ? 'الفهرس' : 'Contents'}
                 </div>
@@ -677,15 +677,19 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                   {locale === 'ar' ? `صفحة ${pageIdx + 1} من ${total}` : `Page ${pageIdx + 1} of ${total}`}
                 </div>
               </div>
+
+              {/* Mobile page counter */}
+              <div className="relative mt-4 text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)] md:hidden">
+                {locale === 'ar' ? `صفحة ${pageIdx + 1} من ${total}` : `Page ${pageIdx + 1} of ${total}`}
+              </div>
             </div>
 
             {/* === RIGHT PAGE: course list with page-flip + clickable courses === */}
             <div
-              className="relative bg-[var(--color-cream)]"
+              className="relative min-h-[460px] bg-[var(--color-cream)] md:min-h-[540px]"
               style={{
                 perspective: 1600,
-                boxShadow: 'inset 22px 0 28px -28px rgba(0,0,0,0.18)',
-                minHeight: 540,
+                boxShadow: 'inset 0 22px 28px -28px rgba(0,0,0,0.18)',
               }}
             >
               {/* Paper texture: subtle striped lines */}
@@ -719,12 +723,12 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                     transformStyle: 'preserve-3d',
                     transformOrigin: locale === 'ar' ? 'right center' : 'left center',
                   }}
-                  className="relative h-full px-8 py-10 sm:px-12"
+                  className="relative h-full px-6 py-8 sm:px-12 sm:py-10"
                 >
                   <div className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">
                     {locale === 'ar' ? 'دوراتنا في' : 'Our courses in'} {lang.name[locale]}
                   </div>
-                  <h4 className="mt-2 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)] sm:text-3xl">
+                  <h4 className="mt-2 font-[var(--font-display)] text-xl text-[var(--color-rlc-900)] sm:text-3xl">
                     {locale === 'ar' ? 'انقر على أيّ دورة لقراءة موجزها' : 'Click any course to read its brief'}
                   </h4>
 
@@ -740,22 +744,22 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                         >
                           <button
                             onClick={() => setSelectedCourseIdx(active ? null : i)}
-                            className={`group/btn flex w-full items-center justify-between gap-4 rounded-sm px-4 py-3 text-start text-sm transition ${
+                            className={`group/btn flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2.5 text-start text-sm transition sm:gap-4 sm:px-4 sm:py-3 ${
                               active
                                 ? 'bg-[var(--color-rlc-800)] text-[var(--color-cream)] ring-1 ring-[var(--color-rlc-800)]'
                                 : 'bg-[var(--color-ivory)] text-[var(--color-ink)] ring-1 ring-[var(--color-line)] hover:bg-[var(--color-rlc-100)]'
                             }`}
                           >
-                            <span className="inline-flex items-center gap-3">
-                              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[0.65rem] font-semibold ${
+                            <span className="inline-flex min-w-0 items-center gap-2.5 sm:gap-3">
+                              <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.65rem] font-semibold ${
                                 active ? 'bg-[var(--color-gold)] text-[var(--color-rlc-900)]' : 'bg-[var(--color-cream)] text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)]'
                               }`}>
                                 {i + 1}
                               </span>
-                              <span className="font-medium">{c.title[locale]}</span>
+                              <span className="truncate font-medium">{c.title[locale]}</span>
                             </span>
-                            <span className={`text-xs transition ${active ? 'text-[var(--color-gold)]' : 'text-[var(--color-ink-soft)] opacity-0 group-hover/btn:opacity-100'}`}>
-                              {active ? (locale === 'ar' ? 'مفتوح ↓' : 'Open ↓') : (locale === 'ar' ? 'موجز' : 'Brief')}
+                            <span className={`shrink-0 text-xs transition ${active ? 'text-[var(--color-gold)]' : 'text-[var(--color-ink-soft)] sm:opacity-0 sm:group-hover/btn:opacity-100'}`}>
+                              {active ? (locale === 'ar' ? '↓' : '↓') : (locale === 'ar' ? 'موجز' : 'Brief')}
                             </span>
                           </button>
                         </motion.li>
@@ -772,7 +776,8 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                 </motion.div>
               </AnimatePresence>
 
-              {/* Course brief overlay: slides in from outer edge */}
+              {/* Course brief overlay: slides in from outer edge.
+                  On mobile it scrolls vertically inside the panel. */}
               <AnimatePresence>
                 {selectedCourse && (
                   <motion.div
@@ -781,22 +786,22 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: locale === 'ar' ? -40 : 40 }}
                     transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 flex flex-col bg-[var(--color-cream)] px-8 py-10 sm:px-12"
+                    className="absolute inset-0 flex flex-col overflow-y-auto bg-[var(--color-cream)] px-6 py-8 sm:px-12 sm:py-10"
                     style={{
                       backgroundImage: 'radial-gradient(circle at 0% 0%, rgba(201,162,74,0.10), transparent 50%)',
                     }}
                   >
                     <button
                       onClick={() => setSelectedCourseIdx(null)}
-                      className="absolute end-6 top-6 inline-flex items-center gap-1 rounded-full bg-[var(--color-ivory)] px-3 py-1.5 text-[0.7rem] font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] hover:bg-[var(--color-rlc-100)]"
+                      className="absolute end-4 top-4 inline-flex items-center gap-1 rounded-full bg-[var(--color-ivory)] px-3 py-1.5 text-[0.7rem] font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] hover:bg-[var(--color-rlc-100)] sm:end-6 sm:top-6"
                     >
-                      ← {locale === 'ar' ? 'العودة للقائمة' : 'Back to list'}
+                      ← {locale === 'ar' ? 'العودة' : 'Back'}
                     </button>
 
-                    <div className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">
+                    <div className="mt-8 text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)] sm:mt-0">
                       {lang.flag} {lang.name[locale]}
                     </div>
-                    <h4 className="mt-2 max-w-md font-[var(--font-display)] text-3xl text-[var(--color-rlc-900)] sm:text-4xl">
+                    <h4 className="mt-2 max-w-md font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)] sm:text-4xl">
                       {selectedCourse.title[locale]}
                     </h4>
                     {selectedCourse.duration && (
@@ -821,21 +826,24 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
               </AnimatePresence>
             </div>
 
-            {/* Spine: vertical bar between the two pages */}
-            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-[44%] w-[2px] bg-gradient-to-b from-transparent via-black/30 to-transparent" />
+            {/* Spine: vertical bar between the two pages on md+. On mobile the
+                pages stack, so the spine becomes a thin horizontal divider. */}
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-[280px] hidden h-[2px] bg-gradient-to-r from-transparent via-black/30 to-transparent md:inset-y-0 md:top-0 md:left-[44%] md:block md:h-auto md:w-[2px] md:bg-gradient-to-b md:from-transparent md:via-black/30 md:to-transparent" />
           </div>
 
-          {/* Page navigation */}
-          <div className="mt-4 flex items-center justify-between gap-3">
+          {/* Page navigation. On mobile the prev/next take precedence; the
+              dot strip wraps below if there isn't room. */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <button
               onClick={() => go(locale === 'ar' ? 1 : -1)}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-4 py-2 text-xs font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-cream)]/40 transition hover:bg-[var(--color-cream)]/90"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-3 py-2 text-xs font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-cream)]/40 transition hover:bg-[var(--color-cream)]/90 sm:px-4"
             >
               {locale === 'ar' ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
-              {locale === 'ar' ? 'الصفحة السابقة' : 'Previous page'}
+              <span className="hidden sm:inline">{locale === 'ar' ? 'الصفحة السابقة' : 'Previous page'}</span>
+              <span className="sm:hidden">{locale === 'ar' ? 'السابقة' : 'Prev'}</span>
             </button>
 
-            <div className="flex gap-1.5">
+            <div className="order-last flex w-full justify-center gap-1.5 sm:order-none sm:w-auto">
               {LANGUAGES.map((_, i) => (
                 <button
                   key={i}
@@ -848,9 +856,10 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
 
             <button
               onClick={() => go(locale === 'ar' ? -1 : 1)}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-gold)] px-4 py-2 text-xs font-medium text-[var(--color-rlc-900)] transition hover:bg-[var(--color-gold-bright)]"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-gold)] px-3 py-2 text-xs font-medium text-[var(--color-rlc-900)] transition hover:bg-[var(--color-gold-bright)] sm:px-4"
             >
-              {locale === 'ar' ? 'الصفحة التالية' : 'Next page'}
+              <span className="hidden sm:inline">{locale === 'ar' ? 'الصفحة التالية' : 'Next page'}</span>
+              <span className="sm:hidden">{locale === 'ar' ? 'التالية' : 'Next'}</span>
               {locale === 'ar' ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
             </button>
           </div>

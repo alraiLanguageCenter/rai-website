@@ -253,7 +253,7 @@ export function Assessment() {
         <p className="mt-5 max-w-2xl body-lg text-[var(--color-ink-soft)]">{t('lede')}</p>
       </Reveal>
 
-      <div className="mt-12 rounded-sm bg-[var(--color-cream)] p-6 ring-1 ring-[var(--color-line)] lg:p-12 min-h-[460px]">
+      <div className="mt-10 rounded-sm bg-[var(--color-cream)] p-4 ring-1 ring-[var(--color-line)] sm:mt-12 sm:p-6 lg:p-12 min-h-[460px]">
         <AnimatePresence mode="wait">
           {/* ───────────────────── INTRO ─────────────────────── */}
           {stage === 'intro' && (
@@ -263,11 +263,11 @@ export function Assessment() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-center justify-center text-center py-8"
             >
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-gold)]/15">
-                <Sparkles className="h-8 w-8 text-[var(--color-gold)]" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-gold)]/15 sm:h-20 sm:w-20">
+                <Sparkles className="h-7 w-7 text-[var(--color-gold)] sm:h-8 sm:w-8" />
               </div>
-              <h3 className="mt-8 font-[var(--font-display)] text-3xl text-[var(--color-rlc-900)]">{t('start')}</h3>
-              <p className="mt-4 max-w-xl text-[var(--color-ink-soft)]">
+              <h3 className="mt-6 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)] sm:mt-8 sm:text-3xl">{t('start')}</h3>
+              <p className="mt-4 max-w-xl text-sm text-[var(--color-ink-soft)] sm:text-base">
                 {locale === 'ar'
                   ? 'ثلاثة أقسام: ٢٥ سؤال اختيار من متعدد، قراءة جهرية لفقرة قصيرة، وكتابة فقرة. سيقوم الذكاء الاصطناعي بتحليل أدائك في المهارات الأربع وإرسال التقرير الكامل إلى المركز.'
                   : 'Three parts: 25 multiple-choice questions, a short read-aloud passage, and a writing task. AI will analyze your performance across all four skills and send the full report to the center.'}
@@ -310,24 +310,24 @@ export function Assessment() {
                   transition={{ duration: 0.5 }}
                 />
               </div>
-              <h3 className="mt-8 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)] lg:text-3xl">
+              <h3 className="mt-6 font-[var(--font-display)] text-xl text-[var(--color-rlc-900)] sm:mt-8 sm:text-2xl lg:text-3xl">
                 {locale === 'ar' ? q.prompt_ar : q.prompt_en}
               </h3>
-              <div className="mt-8 grid gap-3">
+              <div className="mt-6 grid gap-2.5 sm:mt-8 sm:gap-3">
                 {q.options.map((o, i) => (
                   <button
                     key={i}
                     onClick={() => answerMcq(i)}
                     dir="ltr"
-                    className="group flex items-center justify-between gap-4 rounded-sm bg-[var(--color-ivory)] px-5 py-4 text-start text-[var(--color-ink)] ring-1 ring-[var(--color-line)] transition hover:ring-[var(--color-rlc-800)] hover:bg-[var(--color-rlc-100)]"
+                    className="group flex items-start justify-between gap-3 rounded-sm bg-[var(--color-ivory)] px-4 py-3 text-start text-[var(--color-ink)] ring-1 ring-[var(--color-line)] transition hover:ring-[var(--color-rlc-800)] hover:bg-[var(--color-rlc-100)] sm:items-center sm:gap-4 sm:px-5 sm:py-4"
                   >
-                    <span className="inline-flex items-center gap-3">
-                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-cream)] text-xs font-semibold ring-1 ring-[var(--color-line)] group-hover:bg-[var(--color-rlc-800)] group-hover:text-[var(--color-cream)] group-hover:ring-[var(--color-rlc-800)]">
+                    <span className="flex min-w-0 items-start gap-2.5 sm:items-center sm:gap-3">
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-cream)] text-xs font-semibold ring-1 ring-[var(--color-line)] group-hover:bg-[var(--color-rlc-800)] group-hover:text-[var(--color-cream)] group-hover:ring-[var(--color-rlc-800)]">
                         {String.fromCharCode(65 + i)}
                       </span>
-                      <span>{locale === 'ar' ? o.ar : o.en}</span>
+                      <span className="min-w-0 break-words">{locale === 'ar' ? o.ar : o.en}</span>
                     </span>
-                    <span aria-hidden className="text-[var(--color-ink-soft)] opacity-0 transition group-hover:opacity-100">→</span>
+                    <span aria-hidden className="shrink-0 text-[var(--color-ink-soft)] opacity-0 transition group-hover:opacity-100">→</span>
                   </button>
                 ))}
               </div>
@@ -362,7 +362,7 @@ export function Assessment() {
                   : 'Press the microphone and read clearly. AI will evaluate your pronunciation and fluency.'}
               </p>
 
-              <div className="mt-6 rounded-sm bg-[var(--color-ivory)] p-6 text-lg leading-relaxed text-[var(--color-ink)]" dir="ltr">
+              <div className="mt-6 rounded-sm bg-[var(--color-ivory)] p-4 text-base leading-relaxed text-[var(--color-ink)] sm:p-6 sm:text-lg" dir="ltr">
                 "{READING_PASSAGE}"
               </div>
 
@@ -378,13 +378,13 @@ export function Assessment() {
                     onClick={isRecording ? stopRec : startRec}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`relative flex h-20 w-20 items-center justify-center rounded-full transition-all ${
+                    className={`relative flex h-16 w-16 items-center justify-center rounded-full transition-all sm:h-20 sm:w-20 ${
                       isRecording
                         ? 'bg-[var(--color-rose)] text-[var(--color-cream)] shadow-[0_10px_30px_-8px_rgba(180,92,92,0.6)]'
                         : 'bg-[var(--color-rlc-800)] text-[var(--color-cream)] shadow-[0_10px_30px_-12px_rgba(8,57,34,0.6)]'
                     }`}
                   >
-                    {isRecording ? <Square className="h-7 w-7" /> : <Mic className="h-8 w-8" />}
+                    {isRecording ? <Square className="h-6 w-6 sm:h-7 sm:w-7" /> : <Mic className="h-7 w-7 sm:h-8 sm:w-8" />}
                     {isRecording && (
                       <motion.span
                         aria-hidden
@@ -467,10 +467,10 @@ export function Assessment() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-center"
             >
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-gold)]/15">
-                <Check className="h-8 w-8 text-[var(--color-gold)]" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-gold)]/15 sm:h-20 sm:w-20">
+                <Check className="h-7 w-7 text-[var(--color-gold)] sm:h-8 sm:w-8" />
               </div>
-              <h3 className="mt-6 font-[var(--font-display)] text-3xl text-[var(--color-rlc-900)] text-center">
+              <h3 className="mt-6 text-center font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)] sm:text-3xl">
                 {locale === 'ar' ? 'أحسنت! نحتاج بياناتك لإرسال التقرير' : "All done! We just need your details"}
               </h3>
               <p className="mt-3 max-w-md text-center text-sm text-[var(--color-ink-soft)]">{t('captureLede')}</p>
