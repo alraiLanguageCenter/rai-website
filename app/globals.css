@@ -78,6 +78,15 @@
     font-feature-settings: 'kern', 'liga', 'calt', 'mark', 'mkmk';
   }
 
+  /* Arabic has no true italic style — browsers fake it by skewing the glyphs,
+     which looks awful on Kufi. Force normal style anywhere italic is applied
+     in the AR locale (Tailwind .italic, <em>, <i>). */
+  html[lang='ar'] .italic,
+  html[lang='ar'] em,
+  html[lang='ar'] i {
+    font-style: normal;
+  }
+
   ::selection { background: var(--color-gold); color: var(--color-ink); }
 
   h1, h2, h3, h4 {

@@ -239,6 +239,14 @@ function KineticWord({
   reduced: boolean;
 }) {
   const letters = Array.from(word);
+  // Arabic letters have descenders the Latin-sized clip would chop off.
+  // And Arabic has no true italic — the browser would synthesise an awkward
+  // skew. Strip the italic and switch to overflow-visible + bottom padding.
+  const isArabic = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(word);
+  const headingItalicClass = isArabic ? '' : 'italic';
+  const lettersWrapperClass = isArabic
+    ? 'inline-flex items-baseline pb-[0.15em]'
+    : 'inline-flex overflow-hidden';
 
   return (
     <motion.h2
@@ -251,7 +259,7 @@ function KineticWord({
           transition: { delayChildren: 0.18 * index, staggerChildren: reduced ? 0 : 0.04 },
         },
       }}
-      className="display-lg relative inline-flex items-end font-[var(--font-display)] italic text-[var(--color-cream)]"
+      className={`display-lg relative inline-flex items-end font-[var(--font-display)] ${headingItalicClass} text-[var(--color-cream)]`}
       style={{ perspective: 800 }}
     >
       {/* shimmer sweep overlay */}
@@ -271,7 +279,7 @@ function KineticWord({
         />
       )}
 
-      <span className="inline-flex overflow-hidden">
+      <span className={lettersWrapperClass}>
         {letters.map((ch, i) => (
           <motion.span
             key={i}

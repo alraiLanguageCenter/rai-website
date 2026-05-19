@@ -9,9 +9,19 @@ type Props = {
   as?: 'h1' | 'h2' | 'span';
 };
 
+/** Heuristic: does the string contain any Arabic-block code points? */
+const ARABIC_RANGE = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
 export function KineticText({ text, className, delay = 0, as = 'h1' }: Props) {
   const reduced = useReducedMotion();
   const words = text.split(' ');
+  // Arabic letterforms have descenders (ج ح خ ع غ م ن ل ي ى ...) that extend
+  // well below the Latin baseline. The default per-word `overflow-hidden`
+  // clip — sized to Latin font metrics — would chop off those tails. Detect
+  // Arabic content and switch to overflow-visible with a touch of bottom
+  // padding so descenders have breathing room while the reveal animation
+  // still looks great.
+  const isArabic = ARABIC_RANGE.test(text);
 
   const container: Variants = {
     hidden: {},
@@ -31,6 +41,10 @@ export function KineticText({ text, className, delay = 0, as = 'h1' }: Props) {
 
   const Wrapper = motion[as];
 
+  const wordClass = isArabic
+    ? 'inline-block align-baseline overflow-visible pb-[0.15em]'
+    : 'inline-block align-baseline overflow-hidden';
+
   return (
     <Wrapper
       className={className}
@@ -40,7 +54,11 @@ export function KineticText({ text, className, delay = 0, as = 'h1' }: Props) {
       style={{ perspective: 1000 }}
     >
       {words.map((word, i) => (
-        <span key={`${word}-${i}`} className="inline-block overflow-hidden align-baseline" style={{ marginInlineEnd: '0.25em' }}>
+        <span
+          key={`${word}-${i}`}
+          className={wordClass}
+          style={{ marginInlineEnd: '0.25em' }}
+        >
           <motion.span className="inline-block" variants={child}>{word}</motion.span>
         </span>
       ))}
