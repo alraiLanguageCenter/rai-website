@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
@@ -74,12 +74,24 @@ export function PortalShell({
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_1fr]">
-      <aside className="flex flex-col border-b border-[var(--color-line)] bg-[var(--color-ivory)] p-5 lg:border-b-0 lg:border-r">
-        <Logo />
-        <div className="mt-2 inline-flex items-center gap-2 self-start rounded-full bg-[var(--color-gold)]/15 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">
-          {role}
+      <aside className="flex flex-col border-b border-[var(--color-line)] bg-[var(--color-ivory)] p-4 lg:border-b-0 lg:border-r lg:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Logo />
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[var(--color-gold)]/15 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">
+              {role}
+            </span>
+          </div>
+          {/* Mobile sign-out — inline with logo so users can always log out on phones. */}
+          <button
+            onClick={logout}
+            aria-label="Sign out"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--color-rose)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rose)]/10 lg:hidden"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <nav className="mt-8 flex flex-row gap-1 overflow-x-auto lg:mt-10 lg:flex-col">
+        <nav className="mt-5 flex flex-row gap-1 overflow-x-auto pb-1 lg:mt-10 lg:flex-col lg:overflow-visible lg:pb-0">
           {nav.map((n) => {
             const active = pathname === n.href || pathname.startsWith(n.href + '/');
             return (
@@ -111,7 +123,7 @@ export function PortalShell({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="overflow-auto p-6 lg:p-10"
+        className="overflow-auto p-5 sm:p-6 lg:p-10"
       >
         {children}
       </motion.main>
@@ -128,12 +140,22 @@ export function PortalLogin({
   successHref: string;
 }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const denied = sp.get('denied') === '1';
+
+  // If we were redirected here because the account didn't match the role,
+  // sign them out so they can switch accounts without a stale session.
+  useEffect(() => {
+    if (!denied) return;
+    const sb = getSupabaseBrowser();
+    sb.auth.signOut().catch(() => {});
+  }, [denied]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -168,6 +190,12 @@ export function PortalLogin({
             {role} portal
           </div>
           <h1 className="mt-6 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)]">Sign in</h1>
+          {denied && (
+            <div className="mt-4 flex items-start gap-2 rounded-sm bg-[var(--color-rose)]/10 p-3 text-xs text-[var(--color-rose)]">
+              <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>That account isn&apos;t registered as a {role}. Sign in with a {role} account, or ask the administrator to grant access.</span>
+            </div>
+          )}
           <div className="mt-4 inline-flex rounded-full bg-[var(--color-cream)] p-1 ring-1 ring-[var(--color-line)]">
             <button onClick={() => { setMode('password'); setDone(false); setError(null); }}
               className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-[0.14em] ${mode === 'password' ? 'bg-[var(--color-rlc-800)] text-[var(--color-cream)]' : 'text-[var(--color-ink-soft)]'}`}>

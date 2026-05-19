@@ -27,12 +27,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const sb = getSupabaseBrowser();
-    sb.auth.getUser().then(({ data, error }) => {
-      if (error || !data.user) { router.replace('/admin/login'); return; }
-      setEmail(data.user.email ?? null);
+    let alive = true;
+    (async () => {
+      const sb = getSupabaseBrowser();
+      const { data: auth, error } = await sb.auth.getUser();
+      if (error || !auth.user) { router.replace('/admin/login'); return; }
+      // Verify the user actually has admin role — RLS already protects data,
+      // but we don't want non-admins to see a flash of admin UI either.
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('role,email')
+        .eq('id', auth.user.id)
+        .maybeSingle();
+      if (!alive) return;
+      if (profile?.role !== 'admin') {
+        router.replace('/admin/login?denied=1');
+        return;
+      }
+      setEmail(profile?.email ?? auth.user.email ?? null);
       setChecked(true);
-    });
+    })();
+    return () => { alive = false; };
   }, [router]);
 
   async function logout() {

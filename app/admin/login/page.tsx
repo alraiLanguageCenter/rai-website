@@ -1,19 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
-import { Mail, ArrowRight } from 'lucide-react';
+import { Mail, ArrowRight, ShieldAlert } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const sp = useSearchParams();
   const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const denied = sp.get('denied') === '1';
+
+  // If already signed in as a non-admin, sign them out so they can switch accounts.
+  useEffect(() => {
+    if (!denied) return;
+    const sb = getSupabaseBrowser();
+    sb.auth.signOut().catch(() => {});
+  }, [denied]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +57,12 @@ export default function AdminLoginPage() {
             <Mail className="h-5 w-5" />
           </div>
           <h1 className="mt-6 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)]">Admin sign in</h1>
+          {denied && (
+            <div className="mt-4 flex items-start gap-2 rounded-sm bg-[var(--color-rose)]/10 p-3 text-xs text-[var(--color-rose)]">
+              <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>That account does not have admin access. Sign in with an admin account.</span>
+            </div>
+          )}
           <div className="mt-4 inline-flex rounded-full bg-[var(--color-cream)] p-1 ring-1 ring-[var(--color-line)]">
             <button onClick={() => { setMode('password'); setDone(false); setError(null); }}
               className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-[0.14em] ${mode === 'password' ? 'bg-[var(--color-rlc-800)] text-[var(--color-cream)]' : 'text-[var(--color-ink-soft)]'}`}>
