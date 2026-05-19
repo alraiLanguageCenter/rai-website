@@ -45,9 +45,9 @@ export function Logo({
              mark reads clearly on the cream backdrop. Dark variant stays
              a step smaller because the footer already has plenty of room
              from the tagline + columns next to it. */
-          /* Light variant fixed at 120×120 (header). Dark variant kept smaller
+          /* Light variant fixed at 125×125 (header). Dark variant kept smaller
              for the footer where the logo lives next to the tagline + columns. */
-          className={`object-contain ${isDark ? 'h-16 w-16 lg:h-20 lg:w-20' : 'h-[120px] w-[120px]'}`}
+          className={`object-contain ${isDark ? 'h-16 w-16 lg:h-20 lg:w-20' : 'h-[125px] w-[125px]'}`}
         />
       </motion.div>
       {withText && (
