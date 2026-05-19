@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Users, Check, X, Loader2, Hash, MapPin, BadgeCheck, Search,
   GraduationCap, Mail, Phone, Filter, Sparkles, Download,
+  Copy as CopyIcon, KeyRound,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
@@ -44,11 +46,20 @@ export default function AdminStudentsPage() {
   return <AdminShell><Body /></AdminShell>;
 }
 
+type Credentials = {
+  applicantName: string;
+  email: string;
+  tempPassword: string;
+  studentNumber: number | null;
+  loginUrl: string;
+};
+
 function Body() {
   const [rows, setRows] = useState<App[] | null>(null);
   const [tab, setTab] = useState<Status>('pending');
   const [search, setSearch] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
 
   async function load() {
     const sb = getSupabaseBrowser();
@@ -86,13 +97,37 @@ function Body() {
   async function decide(id: string, status: 'approved' | 'rejected' | 'waitlisted') {
     setBusyId(id);
     try {
+      // "Approve" goes through the server endpoint — it creates the auth user,
+      // assigns the student number, and returns a temporary password that we
+      // surface in a modal for the admin to share with the new student.
+      if (status === 'approved') {
+        const app = (rows ?? []).find((r) => r.id === id);
+        const res = await fetch(`/api/admin/applications/${id}/approve`, { method: 'POST' });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.ok) {
+          toast.error(json.error || `Approval failed (HTTP ${res.status})`, { description: json.detail });
+          return;
+        }
+        toast.success(`Approved — RLC-${json.studentNumber} · account created`);
+        setCredentials({
+          applicantName: app?.full_name ?? '',
+          email: json.email,
+          tempPassword: json.tempPassword,
+          studentNumber: json.studentNumber,
+          loginUrl: json.loginUrl,
+        });
+        await load();
+        return;
+      }
+
+      // Reject / waitlist are simple direct updates via RLS.
       const sb = getSupabaseBrowser();
       const { data: { user } } = await sb.auth.getUser();
       const { error } = await sb.from('student_applications').update({
         status, decided_by: user?.id ?? null,
       }).eq('id', id);
       if (error) throw error;
-      toast.success(status === 'approved' ? 'Approved — student number assigned' : `Marked ${status}`);
+      toast.success(`Marked ${status}`);
       await load();
     } catch (e) {
       toast.error('Failed', { description: e instanceof Error ? e.message : '' });
@@ -199,6 +234,144 @@ function Body() {
         {filtered.map((r) => (
           <ApplicationCard key={r.id} app={r} busy={busyId === r.id} onDecide={decide} />
         ))}
+      </div>
+
+      <AnimatePresence>
+        {credentials && (
+          <CredentialsModal data={credentials} onClose={() => setCredentials(null)} />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* -------------------- Credentials modal -------------------- */
+
+function CredentialsModal({ data, onClose }: { data: Credentials; onClose: () => void }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  function copy(label: string, value: string) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(value).then(() => {
+        setCopied(label);
+        setTimeout(() => setCopied(null), 1400);
+      });
+    }
+  }
+  function copyAll() {
+    const text =
+      `Hi ${data.applicantName || 'there'},\n\n` +
+      `Your Rai Language Center student account is ready!\n\n` +
+      (data.studentNumber != null ? `Student number: RLC-${data.studentNumber}\n` : '') +
+      `Email: ${data.email}\n` +
+      `Temporary password: ${data.tempPassword}\n\n` +
+      `Sign in here: ${typeof window !== 'undefined' ? window.location.origin : ''}${data.loginUrl}\n\n` +
+      `Please change your password after your first sign-in.\n\nWelcome to Rai!`;
+    copy('all', text);
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-[var(--color-ink)]/75 p-4 backdrop-blur-md"
+      role="dialog" aria-modal="true"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.94 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.97 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-[var(--color-line)]"
+      >
+        <button onClick={onClose} aria-label="Close"
+          className="absolute end-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-cream)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]">
+          <X className="h-4 w-4" />
+        </button>
+
+        {/* Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-rlc-900)] via-[var(--color-rlc-800)] to-[var(--color-rlc-900)] px-6 py-6 text-[var(--color-cream)]">
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: 'linear-gradient(110deg, transparent 35%, rgba(201,162,74,0.25) 50%, transparent 65%)' }}
+            initial={{ x: '-110%' }} animate={{ x: '110%' }}
+            transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 5, ease: 'easeInOut' }}
+          />
+          <div className="relative flex items-center gap-3">
+            <motion.span
+              initial={{ scale: 0, rotate: -25 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 220, damping: 14 }}
+              className="grid h-12 w-12 place-items-center rounded-full bg-[var(--color-gold)] text-[var(--color-rlc-900)]"
+            >
+              <BadgeCheck className="h-6 w-6" />
+            </motion.span>
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-gold)]">Account created</div>
+              <div className="font-[var(--font-display)] text-xl">{data.applicantName || data.email}</div>
+              {data.studentNumber != null && (
+                <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[var(--color-cream)]/10 px-2 py-0.5 font-mono text-[0.7rem]">
+                  <Hash className="h-3 w-3" /> RLC-{data.studentNumber}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <p className="text-sm text-[var(--color-ink-soft)]">
+            Share these sign-in details with the new student. They&apos;ll be prompted to change the password after first sign-in.
+          </p>
+
+          <div className="mt-5 space-y-3">
+            <CredRow label="Email"               value={data.email}              onCopy={() => copy('email', data.email)}             copied={copied === 'email'} />
+            <CredRow label="Temporary password"  value={data.tempPassword}       onCopy={() => copy('password', data.tempPassword)}   copied={copied === 'password'} mono />
+            <CredRow label="Sign-in URL"         value={data.loginUrl}           onCopy={() => copy('url', `${typeof window !== 'undefined' ? window.location.origin : ''}${data.loginUrl}`)} copied={copied === 'url'} />
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <button
+              onClick={copyAll}
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-800)] px-5 py-2.5 text-sm font-semibold text-[var(--color-cream)] transition hover:bg-[var(--color-rlc-700)]"
+            >
+              <CopyIcon className="h-4 w-4" />
+              {copied === 'all' ? 'Copied!' : 'Copy welcome message'}
+            </button>
+            <button
+              onClick={onClose}
+              className="text-sm font-medium text-[var(--color-ink-soft)] transition hover:text-[var(--color-rlc-800)]"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function CredRow({ label, value, onCopy, copied, mono }: { label: string; value: string; onCopy: () => void; copied: boolean; mono?: boolean }) {
+  return (
+    <div className="rounded-sm bg-[var(--color-ivory)] p-3 ring-1 ring-[var(--color-line)]">
+      <div className="flex items-center justify-between text-[0.65rem] uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">
+        <span className="inline-flex items-center gap-1.5">
+          <KeyRound className="h-3 w-3 text-[var(--color-gold)]" />
+          {label}
+        </span>
+        <button onClick={onCopy} className="inline-flex items-center gap-1 rounded-full bg-[var(--color-cream)] px-2 py-0.5 text-[0.65rem] font-medium text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]">
+          {copied ? <><Check className="h-3 w-3" /> Copied</> : <><CopyIcon className="h-3 w-3" /> Copy</>}
+        </button>
+      </div>
+      <div className={`mt-1 break-all ${mono ? 'font-mono' : ''} text-sm text-[var(--color-ink)]`} dir="ltr">
+        {value}
       </div>
     </div>
   );
@@ -392,7 +565,7 @@ function ApplicationCard({
             className="inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-800)] px-4 py-2 text-xs font-semibold text-[var(--color-cream)] transition hover:bg-[var(--color-rlc-700)] disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <BadgeCheck className="h-3.5 w-3.5" />}
-            Approve &amp; assign #
+            Approve &amp; create login
           </button>
         </div>
       )}

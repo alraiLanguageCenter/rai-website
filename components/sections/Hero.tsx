@@ -274,7 +274,9 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8, duration: 1 }}
-          className="absolute bottom-10 end-10 hidden flex-col items-center gap-3 text-[0.7rem] uppercase tracking-[0.2em] text-[var(--color-ink-soft)] lg:flex"
+          /* Centred horizontally at the bottom of the hero — the visual
+             "keep scrolling" cue sits below the hero copy column. */
+          className="absolute bottom-10 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-[0.7rem] uppercase tracking-[0.2em] text-[var(--color-ink-soft)] lg:flex"
         >
           <span>{t('scrollHint')}</span>
           <motion.span

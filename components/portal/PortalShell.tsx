@@ -233,7 +233,18 @@ export function PortalLogin({
           )}
         </div>
         <p className="mt-6 text-center text-xs text-[var(--color-ink-soft)]">
-          Need access? Ask the administrator to add you as a {role}.
+          {role === 'student' ? (
+            <>
+              First time here?{' '}
+              <a href="/register" className="font-semibold text-[var(--color-rlc-800)] underline-offset-2 hover:underline">
+                Apply as a new student
+              </a>{' '}— once approved you&apos;ll receive your sign-in details by email.
+            </>
+          ) : (
+            <>
+              First time here? Ask the administrator to create your teacher account — you&apos;ll then sign in with the credentials they share.
+            </>
+          )}
         </p>
       </div>
     </main>
