@@ -3,12 +3,14 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Megaphone, CalendarRange, ClipboardList, FileQuestion, Users, LogOut, Image as ImageIcon, MessageSquare, MessageCircle, CalendarPlus, Sparkles } from 'lucide-react';
+import { Megaphone, CalendarRange, ClipboardList, FileQuestion, Users, LogOut, Image as ImageIcon, MessageSquare, MessageCircle, CalendarPlus, Sparkles, LayoutDashboard, UserPlus, Settings } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
 import { cn } from '@/lib/utils';
 
 const NAV = [
+  { href: '/admin/dashboard',     label: 'Dashboard',     Icon: LayoutDashboard },
+  { href: '/admin/students',      label: 'Students',      Icon: UserPlus },
   { href: '/admin/announcements', label: 'Announcements', Icon: Megaphone },
   { href: '/admin/schedule',      label: 'Schedule',      Icon: CalendarRange },
   { href: '/admin/bookings',      label: 'Bookings',      Icon: ClipboardList },
@@ -18,6 +20,7 @@ const NAV = [
   { href: '/admin/assessments',   label: 'Assessments',   Icon: Sparkles },
   { href: '/admin/chatbot',       label: 'Chatbot',       Icon: MessageSquare },
   { href: '/admin/leads',         label: 'Leads',         Icon: Users },
+  { href: '/admin/settings',      label: 'Settings',      Icon: Settings },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

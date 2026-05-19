@@ -40,64 +40,72 @@
         "ar": "مرحباً!"
       },
       {
-        "en": "Welcome.",
-        "ar": "أهلاً."
+        "en": "Bonjour!",
+        "ar": "بونجور!"
       },
       {
-        "en": "Nice to meet you.",
-        "ar": "تشرّفنا."
+        "en": "Hallo!",
+        "ar": "هالو!"
       },
       {
-        "en": "Let's begin.",
-        "ar": "لنبدأ."
+        "en": "Привет!",
+        "ar": "بريفيت!"
       },
       {
-        "en": "How are you?",
-        "ar": "كيف حالك؟"
+        "en": "¡Hola!",
+        "ar": "هولا!"
       },
       {
-        "en": "Good morning!",
-        "ar": "صباح الخير!"
+        "en": "Merhaba!",
+        "ar": "مرحبا!"
       },
       {
-        "en": "Speak with me.",
-        "ar": "تحدّث معي."
+        "en": "你好!",
+        "ar": "نِي هاو!"
       },
       {
-        "en": "Yes, you can.",
-        "ar": "نعم، تستطيع."
+        "en": "こんにちは!",
+        "ar": "كونيتشيوا!"
       },
       {
-        "en": "Tell me more.",
-        "ar": "أخبرني المزيد."
+        "en": "안녕하세요!",
+        "ar": "أنيونغ هاسيو!"
       },
       {
-        "en": "Don't be afraid.",
-        "ar": "لا تخف."
+        "en": "नमस्ते!",
+        "ar": "ناماستيه!"
       },
       {
-        "en": "I understand.",
-        "ar": "أفهم ذلك."
+        "en": "Ciao!",
+        "ar": "تشاو!"
       },
       {
-        "en": "Try again.",
-        "ar": "حاول مرة أخرى."
+        "en": "Olá!",
+        "ar": "أولا!"
       },
       {
-        "en": "You're doing great.",
-        "ar": "أداؤك رائع."
+        "en": "Γειά σου!",
+        "ar": "ياسو!"
       },
       {
-        "en": "Practice makes perfect.",
-        "ar": "الممارسة تصنع الكمال."
+        "en": "שלום!",
+        "ar": "شالوم!"
       },
       {
-        "en": "Are you ready?",
-        "ar": "هل أنت جاهز؟"
+        "en": "Sawasdee!",
+        "ar": "سواديكاب!"
       },
       {
-        "en": "Open a new door.",
-        "ar": "افتح باباً جديداً."
+        "en": "Xin chào!",
+        "ar": "سين تشاو!"
+      },
+      {
+        "en": "Cześć!",
+        "ar": "تشيشتش!"
+      },
+      {
+        "en": "Welcome!",
+        "ar": "أهلاً وسهلاً!"
       }
     ],
     "floatingWords": [
@@ -150,7 +158,16 @@
       "Wonder",
       "Begin",
       "Yes!",
-      "Today"
+      "Today",
+      "Hallo",
+      "Привет",
+      "Ciao",
+      "Olá",
+      "你好",
+      "こんにちは",
+      "안녕",
+      "Merhaba",
+      "Power"
     ]
   },
   "brandStrip": {

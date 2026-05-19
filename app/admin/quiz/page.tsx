@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Save, Eye, EyeOff, FileQuestion, GraduationCap, Library } from 'lucide-react';
+import { Plus, Trash2, Save, Eye, EyeOff, FileQuestion, GraduationCap, Library, Sparkles, Loader2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
@@ -95,14 +96,22 @@ function QuestionsPanel() {
     setRows((rs) => (rs ?? []).map((r) => r.id === id ? { ...r, ...patch } : r));
   }
 
+  const [aiOpen, setAiOpen] = useState(false);
   return (
     <div>
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <button onClick={() => setAiOpen(true)}
+          className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-gold-bright)] px-5 py-2.5 text-sm font-semibold text-[var(--color-rlc-900)] shadow-[0_12px_28px_-12px_rgba(201,162,74,0.55)] transition hover:-translate-y-0.5">
+          <Sparkles className="h-4 w-4" /> Generate with AI
+        </button>
         <button onClick={createNew}
           className="inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-800)] px-5 py-2.5 text-sm font-medium text-[var(--color-cream)] hover:bg-[var(--color-rlc-700)]">
           <Plus className="h-4 w-4" /> New question
         </button>
       </div>
+      <AnimatePresence>
+        {aiOpen && <GenerateModal onClose={() => setAiOpen(false)} onInserted={() => { setAiOpen(false); load(); }} />}
+      </AnimatePresence>
       <div className="mt-5 grid gap-4">
         {rows === null && <Spin />}
         {(rows ?? []).map((q) => (
@@ -304,3 +313,143 @@ function Input({ label, value, onChange, type = 'text', placeholder = '', dir }:
   );
 }
 function Spin() { return <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-rlc-700)] border-t-transparent" />; }
+
+/* -------------------- AI generation modal -------------------- */
+
+function GenerateModal({ onClose, onInserted }: { onClose: () => void; onInserted: () => void }) {
+  const [topic, setTopic] = useState('');
+  const [count, setCount] = useState(5);
+  const [difficulty, setDifficulty] = useState<1 | 2 | 3>(2);
+  const [skillTag, setSkillTag] = useState<'grammar' | 'vocab' | 'reading' | 'speaking' | 'writing'>('grammar');
+  const [level, setLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'mixed'>('mixed');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape' && !busy) onClose(); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose, busy]);
+
+  async function generate() {
+    if (!topic.trim()) { toast.error('Pick a topic'); return; }
+    setBusy(true);
+    try {
+      const res = await fetch('/api/admin/quiz-generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ topic: topic.trim(), count, difficulty, skillTag, level, active: true }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.ok) {
+        toast.success(`Inserted ${json.inserted} question(s) on "${json.topic}"`);
+        onInserted();
+      } else {
+        toast.error(json.error || `Generation failed (HTTP ${res.status})`);
+      }
+    } catch {
+      toast.error('Could not reach the server.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const SUGGESTIONS = [
+    'present simple tense', 'past simple vs past continuous', 'articles a/an/the',
+    'prepositions of time', 'conditionals (if-clauses)', 'business email vocabulary',
+    'travel and tourism vocabulary', 'phrasal verbs', 'reported speech',
+    'modal verbs (can/could/should)', 'comparatives and superlatives',
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={() => !busy && onClose()}
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-[var(--color-ink)]/75 px-4 py-6 backdrop-blur-md"
+      role="dialog" aria-modal="true"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xl rounded-md bg-[var(--color-cream)] p-6 ring-1 ring-[var(--color-line)] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]"
+      >
+        <button onClick={onClose} disabled={busy}
+          className="absolute end-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-rlc-100)]">
+          <X className="h-4 w-4" />
+        </button>
+        <h2 className="inline-flex items-center gap-2 font-[var(--font-display)] text-2xl text-[var(--color-rlc-900)]">
+          <Sparkles className="h-5 w-5 text-[var(--color-gold)]" /> Generate questions with AI
+        </h2>
+        <p className="mt-1 text-sm text-[var(--color-ink-soft)]">
+          Nouha will write {count} placement-test question{count > 1 ? 's' : ''} on your topic, bilingual EN + AR, and append them to the bank.
+        </p>
+
+        <div className="mt-5 grid gap-4">
+          <Input label="Topic" value={topic} onChange={setTopic} placeholder="e.g. present simple tense, business email vocabulary" />
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTIONS.map((s) => (
+              <button key={s} type="button" onClick={() => setTopic(s)}
+                className="rounded-full bg-[var(--color-ivory)] px-2.5 py-1 text-[0.65rem] text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] hover:bg-[var(--color-rlc-100)]">
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-4">
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">How many</span>
+              <input type="number" min={1} max={15} value={count} onChange={(e) => setCount(Math.min(15, Math.max(1, parseInt(e.target.value) || 1)))}
+                className="mt-1.5 w-full rounded-sm border-0 bg-[var(--color-ivory)] px-3 py-2 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]" />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">Difficulty</span>
+              <select value={difficulty} onChange={(e) => setDifficulty(Number(e.target.value) as 1 | 2 | 3)}
+                className="mt-1.5 w-full rounded-sm border-0 bg-[var(--color-ivory)] px-3 py-2 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]">
+                <option value={1}>Easy</option>
+                <option value={2}>Medium</option>
+                <option value={3}>Hard</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">Skill</span>
+              <select value={skillTag} onChange={(e) => setSkillTag(e.target.value as typeof skillTag)}
+                className="mt-1.5 w-full rounded-sm border-0 bg-[var(--color-ivory)] px-3 py-2 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]">
+                <option value="grammar">Grammar</option>
+                <option value="vocab">Vocabulary</option>
+                <option value="reading">Reading</option>
+                <option value="speaking">Speaking</option>
+                <option value="writing">Writing</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-soft)]">Level</span>
+              <select value={level} onChange={(e) => setLevel(e.target.value as typeof level)}
+                className="mt-1.5 w-full rounded-sm border-0 bg-[var(--color-ivory)] px-3 py-2 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]">
+                <option value="mixed">Mixed (A2–B2)</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button onClick={onClose} disabled={busy}
+            className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-xs text-[var(--color-ink-soft)] transition hover:text-[var(--color-rlc-800)] disabled:opacity-50">
+            Cancel
+          </button>
+          <button onClick={generate} disabled={busy || !topic.trim()}
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--color-rlc-800)] px-5 py-2.5 text-sm font-semibold text-[var(--color-cream)] transition hover:bg-[var(--color-rlc-700)] disabled:opacity-50">
+            {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</> : <><Sparkles className="h-4 w-4" /> Generate</>}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}

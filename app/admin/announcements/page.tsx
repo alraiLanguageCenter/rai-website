@@ -152,8 +152,60 @@ function AnnouncementsBody() {
                 </div>
               </div>
             </div>
+
+            {/* Live preview — shows the EN side of how this announcement will look
+                on the public site, matching the real card styling. */}
+            <div className="mt-6 border-t border-[var(--color-line)] pt-5">
+              <div className="mb-3 text-[0.65rem] uppercase tracking-[0.16em] text-[var(--color-gold)]">
+                Preview on the public site (EN)
+              </div>
+              <LivePreview row={r} />
+            </div>
           </article>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- Live preview card -------------------- */
+function LivePreview({ row }: { row: Row }) {
+  return (
+    <div className="mx-auto max-w-sm overflow-hidden rounded-md bg-[var(--color-cream)] ring-1 ring-[var(--color-line)] shadow-[0_18px_40px_-24px_rgba(8,57,34,0.35)]">
+      <div className="relative h-32 overflow-hidden bg-gradient-to-br from-[var(--color-rlc-800)] via-[var(--color-rlc-700)] to-[var(--color-rlc-900)] sm:h-36">
+        {row.flyer_url ? (
+          <img src={row.flyer_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <div className="absolute inset-0">
+            <span aria-hidden className="absolute -end-8 -top-8 h-28 w-28 rounded-full bg-[var(--color-gold)]/25 blur-2xl" />
+            <span aria-hidden className="absolute -start-10 -bottom-8 h-24 w-24 rounded-full bg-[var(--color-rlc-700)]/40 blur-2xl" />
+            <div className="absolute inset-0 grid place-items-center font-[var(--font-display)] text-[5rem] leading-none text-[var(--color-gold)]/25 sm:text-[6rem]">✦</div>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rlc-900)]/80 via-[var(--color-rlc-900)]/25 to-transparent" />
+        <span className="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-gold)] px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-rlc-900)] shadow-[0_8px_18px_-8px_rgba(201,162,74,0.7)]">
+          New
+        </span>
+        {!row.published && (
+          <span className="absolute end-3 top-3 rounded-full bg-[var(--color-rose)] px-2 py-0.5 text-[0.6rem] font-bold uppercase text-white">
+            Draft (hidden)
+          </span>
+        )}
+      </div>
+      <div className="p-5">
+        <h3 className="font-[var(--font-display)] text-lg leading-tight text-[var(--color-rlc-900)] sm:text-xl">
+          {row.title_en || <span className="italic text-[var(--color-ink-soft)]">No title yet</span>}
+        </h3>
+        {row.body_en && (
+          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--color-ink-soft)]">{row.body_en}</p>
+        )}
+        {row.cta_url && (
+          <div className="mt-4">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-rlc-800)]">
+              {row.cta_label_en || 'View flyer'} →
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

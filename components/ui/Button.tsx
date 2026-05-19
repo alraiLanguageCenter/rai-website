@@ -41,18 +41,60 @@ export type ButtonProps = AsButton | AsLink;
 export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(props, ref) {
   const { variant = 'primary', size = 'md', magnetic = false, className, children } = props;
   const classes = cn(base, variants[variant], sizes[size], className);
-  const inner =
-    'href' in props && props.href !== undefined ? (
-      <Link ref={ref as React.Ref<HTMLAnchorElement>} href={props.href} className={classes}
-            {...(props as Omit<AsLink, keyof Common | 'href'>)}>
-        {children}
-      </Link>
-    ) : (
+
+  let inner: React.ReactElement;
+  if ('href' in props && props.href !== undefined) {
+    const href = props.href;
+    // Hash-only anchors and absolute http(s) URLs should use a plain <a> so
+    // smooth-scroll on the current page (e.g. "#book") and new-tab links
+    // actually work. Next.js's <Link> intercepts hash hrefs and sometimes
+    // skips the scroll because it considers the route unchanged.
+    const isAnchor = href.startsWith('#');
+    const isExternal = /^https?:\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:');
+    if (isAnchor || isExternal) {
+      const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (isAnchor && typeof document !== 'undefined') {
+          const id = href.slice(1);
+          const el = document.getElementById(id);
+          if (el) {
+            e.preventDefault();
+            const top = el.getBoundingClientRect().top + window.scrollY - 72;
+            window.scrollTo({ top, behavior: 'smooth' });
+            // Update the URL hash so the back-button still works.
+            history.replaceState(null, '', `#${id}`);
+          }
+        }
+        // Fire any provided onClick (the user's original handler)
+        (props as { onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }).onClick?.(e);
+      };
+      inner = (
+        <a
+          ref={ref as React.Ref<HTMLAnchorElement>}
+          href={href}
+          className={classes}
+          onClick={handleClick}
+          {...(isExternal ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
+          {...(props as Omit<AsLink, keyof Common | 'href' | 'onClick'>)}
+        >
+          {children}
+        </a>
+      );
+    } else {
+      inner = (
+        <Link ref={ref as React.Ref<HTMLAnchorElement>} href={href} className={classes}
+              {...(props as Omit<AsLink, keyof Common | 'href'>)}>
+          {children}
+        </Link>
+      );
+    }
+  } else {
+    inner = (
       <button ref={ref as React.Ref<HTMLButtonElement>} className={classes}
               {...(props as Omit<AsButton, keyof Common>)}>
         {children}
       </button>
     );
+  }
   if (magnetic) return <Magnetic strength={0.25}>{inner}</Magnetic>;
   return inner;
 });

@@ -385,40 +385,56 @@ function ScatteredBubbles({
   }
   const r = rng(cycle * 7 + 13);
 
-  // Pick 3 greetings that weren't used last cycle
+  // Pick 5 greetings that weren't used last cycle
+  const PER_CYCLE = 5;
   const available = greetings
     .map((g, i) => ({ g, i }))
     .filter((p) => !lastUsedRef.current.has(p.i));
-  const pool = available.length >= 3 ? available : greetings.map((g, i) => ({ g, i }));
+  const pool = available.length >= PER_CYCLE ? available : greetings.map((g, i) => ({ g, i }));
   const shuffled = [...pool].sort(() => r() - 0.5);
-  const picks = shuffled.slice(0, 3);
+  const picks = shuffled.slice(0, PER_CYCLE);
   lastUsedRef.current = new Set(picks.map((p) => p.i));
 
-  // Mix languages and tones each cycle (different pattern per cycle)
-  const langPattern: ('en' | 'ar')[] = r() > 0.5 ? ['en', 'ar', 'en'] : ['ar', 'en', 'ar'];
-  const tonePattern: ('green' | 'gold')[] = r() > 0.5 ? ['green', 'gold', 'green'] : ['gold', 'green', 'gold'];
+  // Mix languages and tones each cycle. We just round-robin both — the
+  // greeting array already mixes scripts, so the visible variety comes from
+  // the data, not the rotation.
+  const langPattern: ('en' | 'ar')[] = r() > 0.5
+    ? ['en', 'ar', 'en', 'ar', 'en']
+    : ['ar', 'en', 'ar', 'en', 'ar'];
+  const tonePattern: ('green' | 'gold')[] = r() > 0.5
+    ? ['gold', 'green', 'gold', 'green', 'gold']
+    : ['green', 'gold', 'green', 'gold', 'green'];
 
-  // 4 layout patterns; uses logical end-positioning so RTL flips automatically
+  // 4 layout patterns, each placing 5 bubbles at varied positions along the
+  // "end" side. Uses logical end-positioning so RTL flips automatically.
   const LAYOUTS: { top: string; end: string; delay: number }[][] = [
     [
-      { top: '32%', end: '6%',  delay: 0 },
-      { top: '46%', end: '16%', delay: 0.18 },
+      { top: '18%', end: '12%', delay: 0 },
+      { top: '32%', end: '6%',  delay: 0.12 },
+      { top: '46%', end: '18%', delay: 0.24 },
       { top: '60%', end: '5%',  delay: 0.36 },
+      { top: '74%', end: '14%', delay: 0.48 },
     ],
     [
-      { top: '34%', end: '16%', delay: 0 },
-      { top: '50%', end: '5%',  delay: 0.18 },
+      { top: '22%', end: '4%',  delay: 0 },
+      { top: '34%', end: '16%', delay: 0.12 },
+      { top: '50%', end: '5%',  delay: 0.24 },
       { top: '64%', end: '12%', delay: 0.36 },
+      { top: '78%', end: '6%',  delay: 0.48 },
     ],
     [
-      { top: '36%', end: '5%',  delay: 0 },
-      { top: '50%', end: '15%', delay: 0.18 },
+      { top: '20%', end: '14%', delay: 0 },
+      { top: '36%', end: '5%',  delay: 0.12 },
+      { top: '50%', end: '15%', delay: 0.24 },
       { top: '62%', end: '7%',  delay: 0.36 },
+      { top: '76%', end: '16%', delay: 0.48 },
     ],
     [
-      { top: '38%', end: '12%', delay: 0 },
-      { top: '52%', end: '4%',  delay: 0.18 },
-      { top: '66%', end: '14%', delay: 0.36 },
+      { top: '20%', end: '8%',  delay: 0 },
+      { top: '34%', end: '15%', delay: 0.12 },
+      { top: '48%', end: '4%',  delay: 0.24 },
+      { top: '64%', end: '14%', delay: 0.36 },
+      { top: '78%', end: '8%',  delay: 0.48 },
     ],
   ];
   const layout = LAYOUTS[cycle % LAYOUTS.length];

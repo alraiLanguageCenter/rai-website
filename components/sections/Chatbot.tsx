@@ -7,6 +7,7 @@ import {
   MessageCircle, X, Send, Sparkles, BookOpen, Calendar, Compass, ArrowRight,
   CalendarPlus, GraduationCap,
 } from 'lucide-react';
+import { MarkdownLite } from '@/components/motion/MarkdownLite';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -405,19 +406,37 @@ export function Chatbot() {
               )}
               <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--color-gold)]/20 ring-2 ring-[var(--color-gold)]/60">
                 <Avatar size={48} className="h-full w-full ring-0" />
+                {/* Quiet ring-pulse — softer than the launcher's, sits behind the avatar */}
+                {!reduced && (
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-[var(--color-gold)]/70"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.65, 0, 0.65] }}
+                    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                )}
               </div>
               <div className="relative min-w-0 flex-1">
-                <div className="text-sm font-semibold leading-tight">
+                <div className="text-sm font-semibold leading-tight tracking-tight">
                   {locale === 'ar' ? 'نهى — مساعدة الراعي' : 'Nouha — Rai Assistant'}
                 </div>
-                <div className="mt-0.5 inline-flex items-center gap-1.5 text-[0.65rem] uppercase tracking-[0.14em] opacity-85">
+                {/* Status pill — slightly larger, with a clear dot and a thin
+                    background so the text doesn't blend into the green header */}
+                <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-cream)]/15 px-2 py-0.5 text-[0.65rem] font-semibold tracking-[0.14em]">
                   <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-emerald-300">
-                    <span className="absolute inset-0 animate-ping rounded-full bg-emerald-300/70" />
+                    <motion.span
+                      aria-hidden
+                      className="absolute inset-0 rounded-full bg-emerald-300"
+                      animate={{ scale: [1, 2.2, 1], opacity: [0.7, 0, 0.7] }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    />
                   </span>
-                  {mode === 'chat'
-                    ? (locale === 'ar' ? 'متاحة الآن' : 'Online now')
-                    : (locale === 'ar' ? 'تعبئة نموذج الحجز' : 'Filling booking form')}
-                </div>
+                  <span className="uppercase">
+                    {mode === 'chat'
+                      ? (locale === 'ar' ? 'متاحة' : 'Online')
+                      : (locale === 'ar' ? 'تعبئة الحجز' : 'Filling booking')}
+                  </span>
+                </span>
               </div>
               <button
                 onClick={() => setOpen(false)}
@@ -454,9 +473,8 @@ export function Chatbot() {
                             ? 'rounded-br-sm bg-[var(--color-rlc-800)] text-[var(--color-cream)] rtl:rounded-bl-sm rtl:rounded-br-2xl'
                             : 'rounded-bl-sm bg-[var(--color-ivory)] text-[var(--color-ink)] ring-1 ring-[var(--color-line)] rtl:rounded-br-sm rtl:rounded-bl-2xl'
                         }`}
-                        style={{ whiteSpace: 'pre-wrap' }}
                       >
-                        {m.content}
+                        <MarkdownLite text={m.content} />
                       </div>
                     </motion.div>
                   ))}
