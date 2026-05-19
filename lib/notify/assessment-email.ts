@@ -190,28 +190,23 @@ ${a.recommendedCourse.why}
 — Rai Language Center
 ${SITE_URL}`;
 
-  // Send to candidate and admin as two INDEPENDENT messages so that
-  // Resend's test-mode restriction (only the registered account email may
-  // receive mail from onboarding@resend.dev) can't block both at once.
-  const subjectAdmin = `[Admin copy] ${subject} · ${opts.to}`;
+  // The report goes ONLY to the center inbox (admin) for review.
+  // The candidate's contact info is in the subject line + first paragraph of
+  // the email so admin can follow up directly.
+  const adminSubject = `AI Assessment Report — ${opts.name} (${a.level}) · ${opts.to}`;
 
-  const candidateSend = await resend.emails
-    .send({ from: FROM, to: opts.to, subject, html, text })
-    .then((r) => ({ ok: !r.error, error: r.error }))
-    .catch((e) => ({ ok: false, error: e }));
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: ADMIN_INBOX,
+    replyTo: opts.to || undefined,
+    subject: adminSubject,
+    html,
+    text,
+  });
 
-  const adminSend = await resend.emails
-    .send({ from: FROM, to: ADMIN_INBOX, subject: subjectAdmin, html, text })
-    .then((r) => ({ ok: !r.error, error: r.error }))
-    .catch((e) => ({ ok: false, error: e }));
-
-  if (!candidateSend.ok) console.error('[assessment-email] candidate send failed', candidateSend.error);
-  if (!adminSend.ok) console.warn('[assessment-email] admin BCC failed (likely Resend test-mode)', adminSend.error);
-
-  // We consider it a success as long as at least one of the two went through.
-  return {
-    ok: candidateSend.ok || adminSend.ok,
-    candidate: candidateSend.ok,
-    admin: adminSend.ok,
-  };
+  if (error) {
+    console.error('[assessment-email] admin send failed', error);
+    return { ok: false, error };
+  }
+  return { ok: true };
 }
