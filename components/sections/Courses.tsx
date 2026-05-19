@@ -584,11 +584,47 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
         initial={{ opacity: 0, y: 30, scale: 0.94, rotateX: 8 }}
         animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
         exit={{ opacity: 0, y: 20, scale: 0.96 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
-        style={{ perspective: 2200, transformStyle: 'preserve-3d' }}
+        style={{ perspective: 2400, transformStyle: 'preserve-3d' }}
         className="relative my-auto w-full max-w-5xl"
       >
+        {/* === Aura glow around the book === */}
+        {!reduced && (
+          <>
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -inset-12 rounded-[2rem] bg-[var(--color-gold)]/22 blur-[60px]"
+              animate={{ opacity: [0.45, 0.85, 0.45], scale: [1, 1.03, 1] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-[var(--color-rlc-700)]/30 blur-[40px]"
+              animate={{ opacity: [0.35, 0.7, 0.35] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+            />
+            {/* Tiny gold sparkles drifting around the book edges */}
+            {Array.from({ length: 10 }).map((_, i) => (
+              <motion.span
+                key={i}
+                aria-hidden
+                className="pointer-events-none absolute h-1 w-1 rounded-full bg-[var(--color-gold)]"
+                style={{
+                  top: `${(i * 47) % 100}%`,
+                  left: `${i % 2 === 0 ? '-2%' : '101%'}`,
+                  opacity: 0.6,
+                }}
+                animate={{
+                  y: [0, -14, 0],
+                  opacity: [0.2, 1, 0.2],
+                  scale: [1, 1.6, 1],
+                }}
+                transition={{ duration: 3 + (i % 4), delay: i * 0.3, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            ))}
+          </>
+        )}
         {/* Floating close button. Anchored to the top of the modal viewport on
             mobile (sticky to body of motion.div) so it stays reachable while the
             user scrolls the stacked book. */}
@@ -603,12 +639,22 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
         {/* Book shell (cover + page) */}
         <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
           {/* Cast shadow under the book */}
-          <span aria-hidden className="pointer-events-none absolute -inset-x-8 -bottom-6 h-12 rounded-[50%] bg-black/40 blur-2xl" />
+          <span aria-hidden className="pointer-events-none absolute -inset-x-8 -bottom-8 h-14 rounded-[50%] bg-black/55 blur-2xl" />
+
+          {/* === Page-stack edges: faint slivers behind the front cover that make
+              the book feel thick. Visible on md+; hidden on mobile where the
+              book stacks vertically. === */}
+          <span aria-hidden className="pointer-events-none absolute -bottom-1 inset-x-2 hidden h-1 rounded-b-md bg-gradient-to-b from-[var(--color-ivory)] to-[var(--color-cream)] md:block" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-2 inset-x-4 hidden h-1 rounded-b-md bg-gradient-to-b from-[var(--color-ivory)]/80 to-[var(--color-cream)]/80 md:block" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-3 inset-x-6 hidden h-1 rounded-b-md bg-gradient-to-b from-[var(--color-ivory)]/55 to-[var(--color-cream)]/55 md:block" />
+          {/* Right-edge page stack — a few cream slivers sticking out the side */}
+          <span aria-hidden className="pointer-events-none absolute -end-1 inset-y-3 hidden w-1 rounded-e-md bg-gradient-to-b from-[var(--color-ivory)] via-[var(--color-cream)] to-[var(--color-ivory)] md:block" />
+          <span aria-hidden className="pointer-events-none absolute -end-2 inset-y-5 hidden w-1 rounded-e-md bg-gradient-to-b from-[var(--color-ivory)]/70 via-[var(--color-cream)]/70 to-[var(--color-ivory)]/70 md:block" />
 
           {/* The "book" — two-panel layout on md+, stacks vertically on mobile so
               every course title and brief is readable without horizontal scroll. */}
           <div
-            className="relative grid overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(0,0,0,0.05)] md:[grid-template-columns:minmax(0,11fr)_minmax(0,14fr)]"
+            className="relative grid overflow-hidden rounded-md bg-[var(--color-cream)] shadow-[0_50px_90px_-20px_rgba(0,0,0,0.75),0_0_0_1px_rgba(201,162,74,0.18),inset_0_0_0_1px_rgba(0,0,0,0.05)] md:[grid-template-columns:minmax(0,11fr)_minmax(0,14fr)]"
             style={{ transformStyle: 'preserve-3d' }}
           >
             {/* === LEFT PAGE: cover-ish — language flag, motto, TOC === */}
@@ -618,6 +664,13 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
                 boxShadow: 'inset 0 -22px 32px -28px rgba(0,0,0,0.7)',
               }}
             >
+              {/* Gold cover frame — four corner brackets that say "this is a book cover" */}
+              <span aria-hidden className="pointer-events-none absolute inset-3 hidden md:block">
+                <span className="absolute start-0 top-0 h-6 w-6 border-s border-t border-[var(--color-gold)]/55" />
+                <span className="absolute end-0 top-0 h-6 w-6 border-e border-t border-[var(--color-gold)]/55" />
+                <span className="absolute start-0 bottom-0 h-6 w-6 border-s border-b border-[var(--color-gold)]/55" />
+                <span className="absolute end-0 bottom-0 h-6 w-6 border-e border-b border-[var(--color-gold)]/55" />
+              </span>
               {/* gold corner accent */}
               <span aria-hidden className="pointer-events-none absolute -end-4 -top-4 h-24 w-24 rounded-full bg-[var(--color-gold)]/25 blur-2xl" />
               <span aria-hidden className="pointer-events-none absolute -start-6 -bottom-10 h-32 w-32 rounded-full bg-[var(--color-gold)]/15 blur-3xl" />
@@ -826,9 +879,19 @@ function CatalogBook({ onClose, locale }: { onClose: () => void; locale: 'ar' | 
               </AnimatePresence>
             </div>
 
-            {/* Spine: vertical bar between the two pages on md+. On mobile the
-                pages stack, so the spine becomes a thin horizontal divider. */}
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-[280px] hidden h-[2px] bg-gradient-to-r from-transparent via-black/30 to-transparent md:inset-y-0 md:top-0 md:left-[44%] md:block md:h-auto md:w-[2px] md:bg-gradient-to-b md:from-transparent md:via-black/30 md:to-transparent" />
+            {/* Spine: book seam between the two pages on md+. On mobile the pages
+                stack, so the spine becomes a thin horizontal divider. The desktop
+                spine is gold-tinted and embossed to look like real binding. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-[280px] hidden h-[3px] bg-gradient-to-r from-transparent via-[var(--color-gold)]/30 to-transparent md:inset-y-0 md:top-0 md:left-[44%] md:block md:h-auto md:w-[6px] md:bg-gradient-to-r md:from-black/5 md:via-[var(--color-gold)]/40 md:to-black/40"
+              style={{ boxShadow: 'inset 0 0 6px rgba(0,0,0,0.25)' }}
+            />
+            {/* Gold stitching highlight running down the centre seam */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-2 left-[calc(44%-1px)] hidden w-px bg-gradient-to-b from-transparent via-[var(--color-gold)]/75 to-transparent md:block"
+            />
           </div>
 
           {/* Page navigation. On mobile the prev/next take precedence; the
