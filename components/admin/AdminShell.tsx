@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Megaphone, CalendarRange, ClipboardList, FileQuestion, Users, LogOut, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { Megaphone, CalendarRange, ClipboardList, FileQuestion, Users, LogOut, Image as ImageIcon, MessageSquare, MessageCircle, CalendarPlus, Sparkles } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,10 @@ const NAV = [
   { href: '/admin/announcements', label: 'Announcements', Icon: Megaphone },
   { href: '/admin/schedule',      label: 'Schedule',      Icon: CalendarRange },
   { href: '/admin/bookings',      label: 'Bookings',      Icon: ClipboardList },
+  { href: '/admin/sessions',      label: 'Sessions',      Icon: CalendarPlus },
+  { href: '/admin/complaints',    label: 'Complaints',    Icon: MessageCircle },
   { href: '/admin/quiz',          label: 'Quiz CMS',      Icon: FileQuestion },
+  { href: '/admin/assessments',   label: 'Assessments',   Icon: Sparkles },
   { href: '/admin/chatbot',       label: 'Chatbot',       Icon: MessageSquare },
   { href: '/admin/leads',         label: 'Leads',         Icon: Users },
 ];
