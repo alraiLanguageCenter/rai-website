@@ -23,6 +23,8 @@ const inputSchema = z.object({
       }),
     )
     .min(1),
+  speech: z.object({ reference: z.string(), transcript: z.string() }).optional(),
+  writing: z.object({ prompt: z.string(), text: z.string() }).optional(),
   sendEmail: z.boolean().optional(),
 });
 
@@ -74,6 +76,8 @@ export async function POST(req: Request) {
       score: d.score,
       total,
       answers: d.answers as AnsweredQuestion[],
+      speech: d.speech,
+      writing: d.writing,
     });
   } catch (e) {
     console.error('[assessment/submit] analysis failed', e);

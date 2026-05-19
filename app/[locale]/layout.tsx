@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { routing } from '@/i18n/routing';
 import { fontClassNames } from '@/lib/fonts';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
+import { Chatbot } from '@/components/sections/Chatbot';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -44,6 +45,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider>
           <SmoothScroll>{children}</SmoothScroll>
+          <Chatbot />
           <Toaster position={locale === 'ar' ? 'bottom-left' : 'bottom-right'} dir={dir} theme="light" richColors />
         </NextIntlClientProvider>
       </body>

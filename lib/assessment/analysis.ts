@@ -10,7 +10,7 @@
  * are computed locally so the email always has consistent data.
  */
 
-export type SkillTag = 'grammar' | 'vocab' | 'reading' | 'listening';
+export type SkillTag = 'grammar' | 'reading' | 'speaking' | 'writing';
 
 export type AnsweredQuestion = {
   questionId: string;
@@ -27,14 +27,28 @@ export type SkillScore = {
   pct: number; // 0–100
 };
 
+export type SpeechInput = {
+  reference: string;   // the passage the student was asked to read
+  transcript: string;  // what the browser's Web Speech API heard
+};
+
+export type WritingInput = {
+  prompt: string;      // the writing task shown to the student
+  text: string;        // their submitted paragraph
+};
+
 export type AnalysisInput = {
   name: string;
   email: string;
   locale: 'ar' | 'en';
   level: string; // A1..C2
-  score: number;
-  total: number;
+  score: number;       // MCQ score
+  total: number;       // MCQ total
   answers: AnsweredQuestion[];
+  /** Optional Part-2: the read-aloud task transcript */
+  speech?: SpeechInput;
+  /** Optional Part-3: the written paragraph */
+  writing?: WritingInput;
 };
 
 export type AnalysisOutput = {
@@ -49,6 +63,9 @@ export type AnalysisOutput = {
   studyPlan: { week: string; focus: string; activities: string[] }[];
   /** SVG markup of a 4-axis radar chart with the candidate's scores. */
   radarSvg: string;
+  /** Raw artefacts for the admin's reference (transcript + written paragraph) */
+  speechExcerpt?: { reference: string; transcript: string; accuracyPct: number };
+  writingExcerpt?: { prompt: string; text: string; wordCount: number };
 };
 
 /* ============================================================================
@@ -56,26 +73,76 @@ export type AnalysisOutput = {
    ============================================================================ */
 
 const SKILL_LABEL: Record<SkillTag, { en: string; ar: string }> = {
-  grammar:   { en: 'Grammar',   ar: 'القواعد' },
-  vocab:     { en: 'Vocabulary', ar: 'المفردات' },
-  reading:   { en: 'Reading',   ar: 'القراءة' },
-  listening: { en: 'Listening', ar: 'الاستماع' },
+  grammar:  { en: 'Grammar & Vocabulary', ar: 'القواعد والمفردات' },
+  reading:  { en: 'Reading',              ar: 'القراءة' },
+  speaking: { en: 'Speaking',             ar: 'المحادثة' },
+  writing:  { en: 'Writing',              ar: 'الكتابة' },
 };
 
-const SKILLS: SkillTag[] = ['grammar', 'vocab', 'reading', 'listening'];
+const SKILLS: SkillTag[] = ['grammar', 'reading', 'speaking', 'writing'];
 
-export function computeSkillScores(answers: AnsweredQuestion[]): SkillScore[] {
-  return SKILLS.map((skill) => {
-    const rows = answers.filter((a) => (a.skillTag ?? 'grammar') === skill);
-    const correct = rows.filter((a) => a.correct).length;
-    const total = rows.length;
-    return {
-      skill,
-      correct,
-      total,
-      pct: total === 0 ? 0 : Math.round((correct / total) * 100),
-    };
+/**
+ * Compute MCQ-derived skill scores. Maps the question's skill_tag to one of
+ * 4 categories: grammar/vocab questions → grammar; reading questions →
+ * reading; everything else → grammar (default).
+ *
+ * Speaking and writing scores come from a separate signal (transcript
+ * accuracy + AI scoring) and are merged in computeFullSkillScores().
+ */
+export function computeMcqSkillScores(answers: AnsweredQuestion[]): { grammar: SkillScore; reading: SkillScore } {
+  const grammar = answers.filter((a) => {
+    const tag = a.skillTag ?? 'grammar';
+    return tag === 'grammar' || tag === 'vocab' || tag === 'vocabulary';
   });
+  const reading = answers.filter((a) => (a.skillTag ?? '') === 'reading');
+
+  const score = (rows: AnsweredQuestion[], skill: SkillTag): SkillScore => {
+    const correct = rows.filter((a) => a.correct).length;
+    return {
+      skill, correct, total: rows.length,
+      pct: rows.length === 0 ? 0 : Math.round((correct / rows.length) * 100),
+    };
+  };
+
+  return {
+    grammar: score(grammar, 'grammar'),
+    reading: score(reading, 'reading'),
+  };
+}
+
+/**
+ * Compute speech accuracy by simple word-level matching between the
+ * reference passage and what the speech recognizer heard. Returns 0-100.
+ */
+export function computeSpeechAccuracy(reference: string, transcript: string): number {
+  if (!transcript.trim()) return 0;
+  const refWords = reference.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const trWords  = transcript.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
+  if (refWords.length === 0) return 0;
+  const trSet = new Set(trWords);
+  const matched = refWords.filter((w) => trSet.has(w)).length;
+  // Length penalty if the transcript is substantially shorter than the reference
+  const lengthRatio = Math.min(1, trWords.length / Math.max(1, refWords.length));
+  const raw = (matched / refWords.length) * lengthRatio;
+  return Math.round(raw * 100);
+}
+
+/**
+ * Heuristic baseline for writing quality before AI fills it in.
+ * Word count, sentence count, lexical diversity → 0-100.
+ */
+export function computeWritingBaseline(text: string): { pct: number; wordCount: number; sentences: number; uniqueWords: number } {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const sentences = text.split(/[.!?]+/).map((s) => s.trim()).filter(Boolean).length;
+  const unique = new Set(words.map((w) => w.toLowerCase())).size;
+  if (words.length < 10) return { pct: Math.round(words.length * 4), wordCount: words.length, sentences, uniqueWords: unique };
+  const lengthScore = Math.min(40, Math.round((words.length / 80) * 40));      // up to 40 pts for ~80 words
+  const sentenceScore = Math.min(20, sentences * 5);                            // up to 20 for ≥4 sentences
+  const diversityScore = Math.min(40, Math.round((unique / Math.max(1, words.length)) * 40 * 1.5));
+  return {
+    pct: Math.min(100, lengthScore + sentenceScore + diversityScore),
+    wordCount: words.length, sentences, uniqueWords: unique,
+  };
 }
 
 /* ============================================================================
@@ -226,58 +293,76 @@ function buildStudyPlan(level: string, skills: SkillScore[]): AnalysisOutput['st
    ============================================================================ */
 
 function templateNarrative(input: AnalysisInput, skills: SkillScore[]) {
-  const level = input.level;
-  const overall = Math.round((input.score / Math.max(1, input.total)) * 100);
-  const summary = `${input.name} scored ${input.score}/${input.total} (${overall}%) on the AI placement assessment, placing them at CEFR level **${level}**. Their strongest area is ${[...skills].sort((a, b) => b.pct - a.pct)[0]?.skill ?? 'grammar'} (${[...skills].sort((a, b) => b.pct - a.pct)[0]?.pct ?? 0}%); the area needing the most attention is ${[...skills].sort((a, b) => a.pct - b.pct)[0]?.skill ?? 'reading'} (${[...skills].sort((a, b) => a.pct - b.pct)[0]?.pct ?? 0}%).`;
+  const strongest = [...skills].sort((a, b) => b.pct - a.pct)[0];
+  const weakest = [...skills].sort((a, b) => a.pct - b.pct)[0];
+  const summary = `${input.name}, you completed all three parts of the assessment. Your strongest area is ${SKILL_LABEL[strongest.skill].en} (${strongest.pct}%); your highest-leverage growth area is ${SKILL_LABEL[weakest.skill].en} (${weakest.pct}%).`;
 
-  const competencies = skills.map((s) => ({
-    skill: s.skill,
-    label: SKILL_LABEL[s.skill].en,
-    analysis:
-      s.pct >= 80
-        ? `Excellent control of ${SKILL_LABEL[s.skill].en} — answered ${s.correct} of ${s.total} correctly.`
-        : s.pct >= 60
-          ? `Solid working knowledge of ${SKILL_LABEL[s.skill].en} (${s.correct}/${s.total}). With targeted practice, this area can quickly become a strength.`
-          : s.pct >= 40
-            ? `${SKILL_LABEL[s.skill].en} is developing (${s.correct}/${s.total}). This is a high-leverage area for focused weekly practice.`
-            : `${SKILL_LABEL[s.skill].en} needs the most attention right now (${s.correct}/${s.total}). Don't be discouraged — clear gaps make for fast progress with the right plan.`,
-    recommendation:
-      s.pct >= 80
-        ? 'Maintain through occasional exam-style drills.'
-        : s.pct >= 60
-          ? 'Aim for 20 minutes of focused practice, 3× per week.'
-          : 'Daily 30-minute focused sessions with weekly review at Rai.',
-  }));
+  const competencies = skills.map((s) => {
+    const label = SKILL_LABEL[s.skill].en;
+    const tier =
+      s.pct >= 80 ? 'excellent' :
+      s.pct >= 60 ? 'solid' :
+      s.pct >= 40 ? 'developing' :
+      'beginning';
+    const analysisMap: Record<string, string> = {
+      excellent: `Excellent control of ${label}. The evidence shows confident, accurate performance.`,
+      solid:     `Solid working knowledge of ${label}. With targeted practice this becomes a strength.`,
+      developing:`${label} is developing. This is a high-leverage area for focused weekly practice.`,
+      beginning: `${label} needs the most attention right now. Don't be discouraged — clear gaps mean fast progress with the right plan.`,
+    };
+    const recMap: Record<string, string> = {
+      excellent: 'Maintain through occasional exam-style drills.',
+      solid:     'Aim for 20 minutes of focused practice, 3× per week.',
+      developing:'Daily 30-minute focused sessions with weekly review at Rai.',
+      beginning: 'Start with foundational drills 5× per week with a Rai instructor.',
+    };
+    return {
+      skill: s.skill,
+      label,
+      pct: s.pct,
+      analysis: analysisMap[tier],
+      recommendation: recMap[tier],
+    };
+  });
 
-  return { summary, competencies };
+  return { summary, competencies, overallLevel: input.level as string };
 }
 
 async function aiNarrative(input: AnalysisInput, skills: SkillScore[]) {
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) return null;
   try {
-    const prompt = `You are an experienced English teacher at Rai Language Center in Latakia. A student has just completed an AI-graded placement assessment.
+    const speechBlock = input.speech
+      ? `\n\nPART 2 — READ-ALOUD TASK\nReference passage shown to the student:\n"${input.speech.reference}"\n\nWhat the speech recognizer captured the student saying:\n"${input.speech.transcript || '(silent / no recording)'}"\n`
+      : '';
+
+    const writingBlock = input.writing
+      ? `\n\nPART 3 — WRITING TASK\nPrompt: ${input.writing.prompt}\nStudent's submission:\n"""\n${input.writing.text || '(left blank)'}\n"""\n`
+      : '';
+
+    const prompt = `You are a senior English teacher at Rai Language Center in Latakia, evaluating a placement assessment with THREE parts. Score each of FOUR competencies (Grammar & Vocabulary, Reading, Speaking, Writing) based on the evidence below.
 
 Student: ${input.name}
-CEFR level: ${input.level}
-Overall score: ${input.score}/${input.total}
+Provisional CEFR (from MCQ): ${input.level}
 
-Per-skill breakdown:
-${skills.map((s) => `- ${SKILL_LABEL[s.skill].en}: ${s.correct}/${s.total} (${s.pct}%)`).join('\n')}
+PART 1 — 25 MULTIPLE-CHOICE QUESTIONS
+Per-skill MCQ breakdown:
+${skills.map((s) => `- ${SKILL_LABEL[s.skill].en}: ${s.correct}/${s.total} (${s.pct}%)`).join('\n')}${speechBlock}${writingBlock}
 
-Write:
-1. A warm, specific 2-sentence summary addressing the student by name.
-2. For each of the four competencies (Grammar, Vocabulary, Reading, Listening), a 2-sentence analysis and a 1-sentence specific practice recommendation.
+For the Speaking competency, judge by how well the transcript matches the reference passage AND fluency cues in the transcript (missing words, repeated words, partial phrases).
 
-Reply ONLY in JSON, no prose around it. Schema:
+For the Writing competency, judge as a professional English teacher: grammar correctness, vocabulary range, sentence variety, coherence, task achievement. Be specific — quote one sentence the student wrote if useful.
+
+Return a detailed JSON report, strictly this schema, no prose around it:
 {
-  "summary": "...",
+  "summary": "2-3 sentence warm summary addressing the student by name. Cite one strong area and one growth area.",
   "competencies": [
-    { "skill": "grammar",   "analysis": "...", "recommendation": "..." },
-    { "skill": "vocab",     "analysis": "...", "recommendation": "..." },
-    { "skill": "reading",   "analysis": "...", "recommendation": "..." },
-    { "skill": "listening", "analysis": "...", "recommendation": "..." }
-  ]
+    { "skill": "grammar",  "pct": 0-100, "analysis": "3-4 specific sentences citing evidence", "recommendation": "1 actionable sentence" },
+    { "skill": "reading",  "pct": 0-100, "analysis": "3-4 specific sentences", "recommendation": "1 actionable sentence" },
+    { "skill": "speaking", "pct": 0-100, "analysis": "3-4 specific sentences citing what they said vs. the reference", "recommendation": "1 actionable sentence" },
+    { "skill": "writing",  "pct": 0-100, "analysis": "3-4 specific sentences citing the student's actual writing", "recommendation": "1 actionable sentence" }
+  ],
+  "overallLevel": "A1|A2|B1|B2|C1|C2"
 }`;
 
     const resp = await fetch('https://api.deepseek.com/chat/completions', {
@@ -289,12 +374,12 @@ Reply ONLY in JSON, no prose around it. Schema:
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: 'You return strictly valid JSON. No prose.' },
+          { role: 'system', content: 'You are an experienced senior English teacher. You return strictly valid JSON matching the user\'s schema, no prose around it.' },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.4,
+        temperature: 0.5,
         response_format: { type: 'json_object' },
-        max_tokens: 900,
+        max_tokens: 2000,
       }),
     });
     if (!resp.ok) {
@@ -308,13 +393,16 @@ Reply ONLY in JSON, no prose around it. Schema:
     if (!match) return null;
     const parsed = JSON.parse(match[0]) as {
       summary: string;
-      competencies: { skill: SkillTag; analysis: string; recommendation: string }[];
+      competencies: { skill: SkillTag; pct?: number; analysis: string; recommendation: string }[];
+      overallLevel?: string;
     };
     return {
       summary: parsed.summary,
+      overallLevel: parsed.overallLevel,
       competencies: parsed.competencies.map((c) => ({
         skill: c.skill,
-        label: SKILL_LABEL[c.skill].en,
+        label: SKILL_LABEL[c.skill]?.en ?? c.skill,
+        pct: typeof c.pct === 'number' ? Math.max(0, Math.min(100, c.pct)) : undefined,
         analysis: c.analysis,
         recommendation: c.recommendation,
       })),
@@ -330,25 +418,61 @@ Reply ONLY in JSON, no prose around it. Schema:
    ============================================================================ */
 
 export async function generateAnalysis(input: AnalysisInput): Promise<AnalysisOutput> {
-  const skills = computeSkillScores(input.answers);
+  // 1) Local signals
+  const mcq = computeMcqSkillScores(input.answers);
+  const speechAcc = input.speech ? computeSpeechAccuracy(input.speech.reference, input.speech.transcript) : 0;
+  const writingBaseline = input.writing ? computeWritingBaseline(input.writing.text) : { pct: 0, wordCount: 0, sentences: 0, uniqueWords: 0 };
 
-  // Prefer AI; fall back to template
-  const ai = await aiNarrative(input, skills);
-  const narrative = ai ?? templateNarrative(input, skills);
+  // 2) Build the four-skill scores (use AI's pct override below if it returned one)
+  const baseSkills: SkillScore[] = [
+    { skill: 'grammar',  correct: mcq.grammar.correct, total: mcq.grammar.total, pct: mcq.grammar.pct },
+    { skill: 'reading',  correct: mcq.reading.correct, total: mcq.reading.total, pct: mcq.reading.pct },
+    { skill: 'speaking', correct: 0, total: 0, pct: speechAcc },
+    { skill: 'writing',  correct: 0, total: 0, pct: writingBaseline.pct },
+  ];
 
-  const recommendedCourse = recommendCourse(input.level, skills);
-  const studyPlan = buildStudyPlan(input.level, skills);
+  // 3) AI narrative (or template fallback)
+  const ai = await aiNarrative(input, baseSkills);
+  const narrative = ai ?? templateNarrative(input, baseSkills);
+
+  // 4) If AI gave a per-skill pct, use it (more nuanced than our heuristics)
+  const skills: SkillScore[] = baseSkills.map((s) => {
+    const fromAi = narrative.competencies?.find((c) => c.skill === s.skill && typeof (c as { pct?: number }).pct === 'number');
+    if (fromAi && typeof (fromAi as { pct?: number }).pct === 'number') {
+      return { ...s, pct: (fromAi as { pct: number }).pct };
+    }
+    return s;
+  });
+
+  // 5) Recompute overall level from the 4-skill average if AI gave us a level
+  const overall = ai?.overallLevel || input.level;
+  const overallPct = Math.round(skills.reduce((a, s) => a + s.pct, 0) / skills.length);
+
+  const recommendedCourse = recommendCourse(overall, skills);
+  const studyPlan = buildStudyPlan(overall, skills);
   const radarSvg = radarChartSvg(skills, input.locale);
 
   return {
-    level: input.level,
-    score: input.score,
-    total: input.total,
+    level: overall,
+    score: overallPct,
+    total: 100,
     skills,
     summary: narrative.summary,
-    competencies: narrative.competencies,
+    competencies: narrative.competencies.map((c) => ({
+      skill: c.skill, label: c.label, analysis: c.analysis, recommendation: c.recommendation,
+    })),
     recommendedCourse,
     studyPlan,
     radarSvg,
+    speechExcerpt: input.speech ? {
+      reference: input.speech.reference,
+      transcript: input.speech.transcript,
+      accuracyPct: speechAcc,
+    } : undefined,
+    writingExcerpt: input.writing ? {
+      prompt: input.writing.prompt,
+      text: input.writing.text,
+      wordCount: writingBaseline.wordCount,
+    } : undefined,
   };
 }

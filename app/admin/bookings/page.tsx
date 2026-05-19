@@ -167,20 +167,68 @@ function BookingCard({ r, busy, onApprove, onReject }: { r: Row; busy: boolean; 
       )}
 
       {r.status === 'approved' && (
-        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-sm bg-[var(--color-rlc-100)] p-3">
-            <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">Confirmed</div>
-            <div className="mt-1 font-medium">{r.approved_slot ? dateFmt.format(new Date(r.approved_slot)) : '—'}{r.room ? ` · Room ${r.room}` : ''}</div>
-          </div>
-          <div className="rounded-sm bg-[var(--color-rlc-100)] p-3">
-            <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">Notifications</div>
-            <div className="mt-1 inline-flex items-center gap-3 text-xs">
-              <span className={r.notified_email ? 'text-[var(--color-rlc-700)]' : 'text-[var(--color-ink-soft)]'}>{r.notified_email ? '✓' : '·'} Email</span>
-              <span className={r.notified_wapp ? 'text-[var(--color-rlc-700)]' : 'text-[var(--color-ink-soft)]'}>{r.notified_wapp ? '✓' : '·'} WhatsApp</span>
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-sm bg-[var(--color-rlc-100)] p-3">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">Confirmed</div>
+              <div className="mt-1 font-medium">{r.approved_slot ? dateFmt.format(new Date(r.approved_slot)) : '—'}{r.room ? ` · Room ${r.room}` : ''}</div>
+            </div>
+            <div className="rounded-sm bg-[var(--color-rlc-100)] p-3">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--color-rlc-800)]">Notifications</div>
+              <div className="mt-1 inline-flex items-center gap-3 text-xs">
+                <span className={r.notified_email ? 'text-[var(--color-rlc-700)]' : 'text-[var(--color-ink-soft)]'}>{r.notified_email ? '✓' : '·'} Email</span>
+                <span className={r.notified_wapp ? 'text-[var(--color-rlc-700)]' : 'text-[var(--color-ink-soft)]'}>{r.notified_wapp ? '✓' : '·'} WhatsApp</span>
+              </div>
             </div>
           </div>
-        </div>
+          <WhatsAppActions r={r} kind="approved" />
+        </>
       )}
+      {r.status === 'rejected' && <WhatsAppActions r={r} kind="rejected" />}
+    </div>
+  );
+}
+
+/** WhatsApp deeplink + copy-to-clipboard generator for an approved/rejected booking. */
+function WhatsAppActions({ r, kind }: { r: Row; kind: 'approved' | 'rejected' }) {
+  const slot = r.approved_slot
+    ? new Intl.DateTimeFormat(r.locale === 'ar' ? 'ar-SY' : 'en-GB', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(r.approved_slot))
+    : '';
+
+  const message = r.locale === 'ar'
+    ? (kind === 'approved'
+        ? `مرحباً ${r.name} 👋\nيسعدنا تأكيد موعد تقييمك في مركز الراعي للغات:\n📅 ${slot}${r.room ? `\n📍 القاعة: ${r.room}` : ''}\nيرجى الحضور قبل ١٥ دقيقة. للتعديل: +963 17 2566699`
+        : `مرحباً ${r.name} 👋\nشكراً لاهتمامك بمركز الراعي للغات.\nللأسف لم نتمكن من تأكيد المواعيد التي اقترحتَها. هل يمكنك اقتراح ٢-٣ مواعيد أخرى؟ سنبذل جهدنا لتلبيتها.\nتواصل معنا: +963 17 2566699`)
+    : (kind === 'approved'
+        ? `Hello ${r.name} 👋\nWe're pleased to confirm your assessment at Rai Language Center:\n📅 ${slot}${r.room ? `\n📍 Room: ${r.room}` : ''}\nPlease arrive 15 minutes early. To reschedule: +963 17 2566699`
+        : `Hello ${r.name} 👋\nThank you for your interest in Rai Language Center.\nUnfortunately we couldn't confirm the slots you suggested. Could you propose 2-3 alternative times? We'll do our best to accommodate.\nReach us at: +963 17 2566699`);
+
+  const cleanPhone = (r.phone || '').replace(/[^0-9]/g, '');
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+  return (
+    <div className="mt-3 grid gap-2 rounded-sm bg-[var(--color-ivory)] p-3 md:grid-cols-[1fr_auto_auto]">
+      <textarea
+        readOnly
+        value={message}
+        rows={4}
+        className="resize-none rounded-sm border-0 bg-[var(--color-cream)] px-3 py-2 text-xs text-[var(--color-ink)] ring-1 ring-[var(--color-line)] focus:outline-none"
+      />
+      <button
+        type="button"
+        onClick={() => { navigator.clipboard.writeText(message); toast.success('Copied'); }}
+        className="self-stretch rounded-full bg-[var(--color-rlc-800)] px-4 text-xs font-medium text-[var(--color-cream)] hover:bg-[var(--color-rlc-700)]"
+      >
+        Copy
+      </button>
+      <a
+        href={waUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="self-stretch grid place-items-center rounded-full bg-[#25D366] px-4 text-xs font-medium text-white hover:bg-[#1ebd5b]"
+      >
+        WhatsApp →
+      </a>
     </div>
   );
 }

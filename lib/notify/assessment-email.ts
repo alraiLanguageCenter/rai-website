@@ -114,6 +114,26 @@ export async function sendAssessmentReport(opts: {
         .join('')}
     </table>`;
 
+  // -- Speech & Writing raw artefacts for admin's reference --
+  const artefactsBlock = `
+    ${a.speechExcerpt ? `
+    <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:${COLORS.green700}">${isAr ? 'القراءة الصوتية' : 'Read-aloud transcript'} — ${a.speechExcerpt.accuracyPct}% ${isAr ? 'تطابق' : 'match'}</p>
+    <div style="background:${COLORS.ivory};border-radius:8px;padding:12px 16px;margin:0 0 18px;font-size:13px;color:${COLORS.inkSoft};line-height:1.55">
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${COLORS.green700};margin-bottom:6px">${isAr ? 'النص المرجعي' : 'Reference'}</div>
+      <div style="color:${COLORS.ink}">"${escapeHtml(a.speechExcerpt.reference)}"</div>
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${COLORS.green700};margin:10px 0 6px">${isAr ? 'ما قاله الطالب' : 'What the student said'}</div>
+      <div style="color:${COLORS.ink};font-style:italic">"${escapeHtml(a.speechExcerpt.transcript || '(no recording)')}"</div>
+    </div>` : ''}
+    ${a.writingExcerpt ? `
+    <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:${COLORS.green700}">${isAr ? 'الكتابة' : 'Written response'} — ${a.writingExcerpt.wordCount} ${isAr ? 'كلمة' : 'words'}</p>
+    <div style="background:${COLORS.ivory};border-radius:8px;padding:12px 16px;margin:0 0 18px;font-size:13px;color:${COLORS.inkSoft};line-height:1.55">
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${COLORS.green700};margin-bottom:6px">${isAr ? 'السؤال' : 'Prompt'}</div>
+      <div style="color:${COLORS.ink}">${escapeHtml(a.writingExcerpt.prompt)}</div>
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${COLORS.green700};margin:10px 0 6px">${isAr ? 'إجابة الطالب' : "Student's response"}</div>
+      <div style="color:${COLORS.ink};white-space:pre-wrap">${escapeHtml(a.writingExcerpt.text || '(left blank)')}</div>
+    </div>` : ''}
+  `;
+
   // -- Recommended course --
   const courseBlock = `
     <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:${COLORS.green700}">${isAr ? 'الدورة الموصى بها' : 'Recommended course'}</p>
@@ -176,6 +196,7 @@ export async function sendAssessmentReport(opts: {
           ${levelBlock}
           ${radarBlock}
           ${competencyBlock}
+          ${artefactsBlock}
           ${courseBlock}
           ${planBlock}
         </td></tr>
