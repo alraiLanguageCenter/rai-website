@@ -12,14 +12,28 @@ import { MarkdownLite } from '@/components/motion/MarkdownLite';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 /**
- * Conversational mode. 'chat' is normal Q&A through the LLM; the booking-*
- * states form a guided form-collection flow where each user message is
- * captured into the draft, the form on the page is pre-filled at the end,
- * and the user is gently handed off to finish (slot + send).
+ * Conversational mode.
+ *   - 'chat'           : normal Q&A through the LLM
+ *   - 'booking-collect': free-text booking flow — Nouha asks for everything in
+ *                        one message, /api/chat-extract pulls structured
+ *                        fields out, and any missing ones are asked for
+ *                        conversationally before /api/contact is auto-called.
  */
-type Mode = 'chat' | 'booking-name' | 'booking-email' | 'booking-phone';
+type Mode = 'chat' | 'booking-collect';
 
-type BookingDraft = { name?: string; email?: string; phone?: string };
+type BookingDraft = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  ageGroup?: 'child' | 'teen' | 'adult' | 'professional';
+  course?: string;
+  preferredSlots?: string;
+  notes?: string;
+};
+
+const REQUIRED_FIELDS: (keyof BookingDraft)[] = ['name', 'email', 'phone'];
+const CENTER_WHATSAPP_DISPLAY = '+963 966 466699';
+const CENTER_WHATSAPP_AR_DIGITS = '+٩٦٣ ٩٦٦ ٤٦٦٦٩٩';
 
 const AVATAR_SRC = '/brand/chatbot-character.png';
 
@@ -81,15 +95,13 @@ export function Chatbot() {
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
-  function isLikelyEmail(s: string) { return /.+@.+\..+/.test(s.trim()); }
-  function isLikelyPhone(s: string) { return /[+0-9٠-٩][\d\s+\-()٠-٩]{6,}/.test(s.trim()); }
+  // (legacy per-field validators removed — NL extraction handles email/phone now)
 
   /* -------------------- guided flows -------------------- */
 
-  /** Begin the "book assessment" guided flow: collect name → email → phone, then prefill the form. */
+  /** Begin the booking flow. One question: "share everything in one message". */
   function startBookingFlow() {
-    scrollToSection('book');
-    setMode('booking-name');
+    setMode('booking-collect');
     setBookingDraft({});
     setMessages((m) => [
       ...m,
@@ -97,8 +109,8 @@ export function Chatbot() {
       {
         role: 'assistant',
         content: locale === 'ar'
-          ? 'رائع — سأملأ نموذج الحجز معك خطوة بخطوة. ما اسمك الكامل؟'
-          : "Great — I'll fill the booking form with you step by step. What's your full name?",
+          ? 'بالتأكيد! 🌿 شاركني في رسالة واحدة:\n\n• **اسمك الكامل**\n• **بريدك الإلكتروني**\n• **رقم الواتساب** مع رمز الدولة\n• الفئة العمرية (طفل / يافع / بالغ / مهني)\n• الدورة التي تهمّك (إنجليزي، فرنسي، ...)\n• أوقاتك المفضّلة (مثلاً: الثلاثاء صباحاً، الخميس مساءً)\n\nسأملأ النموذج وأرسل طلبك للفريق فور استلام بياناتك. 💚'
+          : "Wonderful! 🌿 In one message please share:\n\n• **Your full name**\n• **Email**\n• **WhatsApp number** with country code\n• Age group (child / teen / adult / professional)\n• Course of interest (English, French, …)\n• Preferred days/times (e.g. Tuesday morning, Thursday evening)\n\nI'll fill the form and send your request to our team as soon as I have your details. 💚",
       },
     ]);
   }
@@ -124,56 +136,82 @@ export function Chatbot() {
     setTimeout(() => setOpen(false), 1400);
   }
 
-  /** Handle a user message while inside a guided booking flow. */
-  function handleBookingStep(userText: string) {
-    setMessages((m) => [...m, { role: 'user', content: userText }]);
-
-    if (mode === 'booking-name') {
-      const name = userText.trim();
-      setBookingDraft((d) => ({ ...d, name }));
-      setMode('booking-email');
-      pushAssistant(locale === 'ar'
-        ? `شكراً ${name} 🌿 ما هو بريدك الإلكتروني؟`
-        : `Thanks ${name} 🌿 What's your email address?`);
-      return;
-    }
-
-    if (mode === 'booking-email') {
-      if (!isLikelyEmail(userText)) {
-        pushAssistant(locale === 'ar'
-          ? 'هذا لا يبدو بريداً إلكترونياً صحيحاً. حاول مرة أخرى من فضلك — مثل name@example.com'
-          : "That doesn't look like a valid email. Could you try again? e.g. name@example.com");
-        return;
-      }
-      const email = userText.trim();
-      setBookingDraft((d) => ({ ...d, email }));
-      setMode('booking-phone');
-      pushAssistant(locale === 'ar'
-        ? 'ممتاز. وما رقم الواتساب لديك (مع رمز الدولة)؟'
-        : "Perfect. And your WhatsApp number (with country code)?");
-      return;
-    }
-
-    if (mode === 'booking-phone') {
-      if (!isLikelyPhone(userText)) {
-        pushAssistant(locale === 'ar'
-          ? 'الرقم لا يبدو صحيحاً. حاول بصيغة مثل +963 966 466699'
-          : "That doesn't look like a valid phone. Try something like +963 966 466699.");
-        return;
-      }
-      const phone = userText.trim();
-      const draft = { ...bookingDraft, phone };
-      setBookingDraft(draft);
+  /** Submit the collected booking to /api/contact (which already saves the lead
+   *  and notifies the admin inbox). On success, close the booking flow and
+   *  confirm in chat with the centre WhatsApp number. */
+  async function submitBooking(draft: BookingDraft) {
+    const isAr = locale === 'ar';
+    pushAssistant(isAr ? '...جارٍ إرسال طلبك إلى الفريق' : 'Sending your request to the team…');
+    try {
+      const payload = {
+        locale,
+        website: '',
+        name: draft.name ?? '',
+        email: draft.email ?? '',
+        phone: draft.phone ?? '',
+        course: deriveCourseSlug(draft.course),
+        message: [
+          `[Chatbot booking — via Nouha]`,
+          draft.course && `Course of interest: ${draft.course}`,
+          draft.ageGroup && `Age group: ${draft.ageGroup}`,
+          draft.preferredSlots && `Preferred slots: ${draft.preferredSlots}`,
+          draft.notes && `Notes: ${draft.notes}`,
+        ].filter(Boolean).join('\n'),
+      };
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setMode('chat');
-      // Dispatch the prefill event — Booking.tsx listens and populates the form.
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('rai:prefill-booking', { detail: draft }));
+      setBookingDraft({});
+      const whatsapp = isAr ? CENTER_WHATSAPP_AR_DIGITS : CENTER_WHATSAPP_DISPLAY;
+      pushAssistant(
+        isAr
+          ? `تمّ إرسال طلبك بنجاح! ✨\n\n**ملخّص بياناتك:**\n• الاسم: ${draft.name}\n• البريد: ${draft.email}\n• الهاتف: ${draft.phone}${draft.course ? `\n• الدورة: ${draft.course}` : ''}${draft.ageGroup ? `\n• الفئة: ${draft.ageGroup}` : ''}${draft.preferredSlots ? `\n• الأوقات المفضّلة: ${draft.preferredSlots}` : ''}\n\nسيتواصل أحد أعضاء فريقنا معك قريباً عبر البريد أو الواتساب لتأكيد التفاصيل.\n\n📱 رقم الواتساب لدينا: **${whatsapp}**`
+          : `Your request was sent successfully! ✨\n\n**Summary of what I sent:**\n• Name: ${draft.name}\n• Email: ${draft.email}\n• Phone: ${draft.phone}${draft.course ? `\n• Course: ${draft.course}` : ''}${draft.ageGroup ? `\n• Age group: ${draft.ageGroup}` : ''}${draft.preferredSlots ? `\n• Preferred slots: ${draft.preferredSlots}` : ''}\n\nOne of our team will reach out to you shortly by email or WhatsApp to confirm the details.\n\n📱 Our WhatsApp number: **${whatsapp}**`
+      );
+    } catch (err) {
+      pushAssistant(
+        isAr
+          ? `عذراً، تعذّر إرسال طلبك للخادم. يمكنك التواصل معنا مباشرة عبر الواتساب: **${CENTER_WHATSAPP_AR_DIGITS}** أو الاتصال على **+٩٦٣ ١٧ ٢٥٦٦٦٩٩**.`
+          : `Sorry — I couldn't send your request right now. You can reach us directly on WhatsApp: **${CENTER_WHATSAPP_DISPLAY}** or by phone **+963 17 2566699**.`
+      );
+      console.error('[chatbot] booking submit failed', err);
+    }
+  }
+
+  /** While in 'booking-collect' mode, each user message is passed to
+   *  /api/chat-extract; missing required fields are asked for one at a time;
+   *  when all required fields are present the booking auto-submits. */
+  async function handleBookingNL(userText: string) {
+    setMessages((m) => [...m, { role: 'user', content: userText }]);
+    try {
+      const res = await fetch('/api/chat-extract', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ message: userText, current: bookingDraft, locale }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; extracted?: BookingDraft };
+      const merged: BookingDraft = { ...bookingDraft, ...(json.extracted ?? {}) };
+      setBookingDraft(merged);
+
+      const missing = REQUIRED_FIELDS.filter((k) => !merged[k]);
+      if (missing.length === 0) {
+        // We have name + email + phone — go ahead and submit.
+        await submitBooking(merged);
+        return;
       }
-      scrollToSection('book');
+
+      // Ask for the next missing field. Keep the message short and friendly.
+      const ask = missingPrompt(missing[0], locale);
+      pushAssistant(ask);
+    } catch (err) {
+      console.error('[chatbot] extract failed', err);
       pushAssistant(locale === 'ar'
-        ? `تمّ! ملأتُ نموذج الحجز ببياناتك:\n• الاسم: ${draft.name}\n• البريد: ${draft.email}\n• الهاتف: ${draft.phone}\n\nاختر الفئة العمرية وموعداً مفضّلاً ثم اضغط "أرسل". سيتواصل معك الفريق قريباً 💚`
-        : `Done! I've filled the booking form with your info:\n• Name: ${draft.name}\n• Email: ${draft.email}\n• Phone: ${draft.phone}\n\nPick an age group and a preferred slot, then hit "Send". Our team will reach out shortly 💚`);
-      return;
+        ? 'تعذّر تحليل رسالتك. ممكن تشاركني اسمك وبريدك ورقم هاتفك مرة أخرى؟'
+        : "I couldn't parse your message. Could you share your name, email, and phone again?");
     }
   }
 
@@ -183,10 +221,15 @@ export function Chatbot() {
     const text = (rawText ?? input).trim();
     if (!text || sending) return;
 
-    // 1) If we're inside the guided booking flow, capture locally.
-    if (mode !== 'chat') {
+    // 1) If we're inside the booking flow, route to the NL extractor.
+    if (mode === 'booking-collect') {
       setInput('');
-      handleBookingStep(text);
+      setSending(true);
+      try {
+        await handleBookingNL(text);
+      } finally {
+        setSending(false);
+      }
       return;
     }
 
@@ -286,10 +329,9 @@ export function Chatbot() {
 
   const showSuggestions = messages.length <= 1 && !sending && mode === 'chat';
 
-  // Placeholder text adapts to the guided-flow step.
-  const placeholder = mode === 'booking-name' ? (locale === 'ar' ? 'اكتب اسمك الكامل…' : 'Type your full name…')
-    : mode === 'booking-email' ? (locale === 'ar' ? 'اكتب بريدك الإلكتروني…' : 'Type your email…')
-    : mode === 'booking-phone' ? (locale === 'ar' ? 'اكتب رقم الواتساب…' : 'Type your WhatsApp number…')
+  // Placeholder text adapts when we're in the booking flow.
+  const placeholder = mode === 'booking-collect'
+    ? (locale === 'ar' ? 'اكتب اسمك وبريدك وهاتفك وأوقاتك المفضّلة…' : 'Type your name, email, phone, preferred times…')
     : (locale === 'ar' ? 'اكتب رسالة...' : 'Type a message…');
 
   return (
@@ -572,10 +614,7 @@ export function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={placeholder}
-                /* When collecting an email, hint the right keyboard on mobile.
-                   Same for phone. */
-                type={mode === 'booking-email' ? 'email' : mode === 'booking-phone' ? 'tel' : 'text'}
-                inputMode={mode === 'booking-phone' ? 'tel' : undefined}
+                type="text"
                 className="flex-1 rounded-full bg-[var(--color-ivory)] px-4 py-2.5 text-sm ring-1 ring-[var(--color-line)] focus:outline-none focus:ring-2 focus:ring-[var(--color-rlc-800)]"
               />
               <button
@@ -592,6 +631,36 @@ export function Chatbot() {
       </AnimatePresence>
     </>
   );
+}
+
+/* -------------------- NL booking helpers -------------------- */
+
+/**
+ * Returns a friendly follow-up question asking the user for one specific
+ * missing field. Used after partial extraction.
+ */
+function missingPrompt(field: keyof BookingDraft, locale: 'ar' | 'en'): string {
+  const isAr = locale === 'ar';
+  switch (field) {
+    case 'name':  return isAr ? 'ما اسمك الكامل؟ 🌿' : "What's your full name? 🌿";
+    case 'email': return isAr ? 'وما بريدك الإلكتروني؟' : "And your email address?";
+    case 'phone': return isAr ? 'وما رقم الواتساب لديك (مع رمز الدولة)؟' : "And your WhatsApp number (with country code)?";
+    default: return isAr ? 'ممكن تخبرني بالمزيد؟' : 'Could you share a bit more?';
+  }
+}
+
+/** Map a free-text "course" string from the NL extractor to one of the slugs
+ *  the existing /api/contact schema accepts. */
+function deriveCourseSlug(input?: string): 'kids' | 'adults' | 'exams' | 'business' | 'other' {
+  if (!input) return 'other';
+  const s = input.toLowerCase();
+  if (/(kid|child|teen|young|أطفال|طفل|يافع)/.test(s)) return 'kids';
+  if (/(toefl|ielts|cambridge|delf|dele|goethe|exam|امتحان|تحضير)/.test(s)) return 'exams';
+  if (/(business|professional|work|أعمال|مهني)/.test(s)) return 'business';
+  if (/(general|adult|conversation|بالغ|محادثة|عام)/.test(s)) return 'adults';
+  // Treat plain language names as 'adults' (the catch-all general track).
+  if (/(english|french|german|russian|spanish|turkish|arabic|إنجليز|فرنس|ألمان|روس|إسبان|ترك|عرب)/.test(s)) return 'adults';
+  return 'other';
 }
 
 /* -------------------- Avatar (image with safe icon fallback) -------------------- */

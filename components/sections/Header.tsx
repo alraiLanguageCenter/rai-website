@@ -26,7 +26,7 @@ export function Header() {
     { href: '#journey', label: t('journey') },
     { href: '#schedule', label: t('schedule') },
     { href: '#assess', label: t('assess') },
-    { href: '#contact', label: t('contact') },
+    { href: '#book', label: t('contact') },
   ];
 
   return (

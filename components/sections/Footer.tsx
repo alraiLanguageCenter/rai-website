@@ -29,7 +29,7 @@ export function Footer() {
     { href: '#schedule', label: tNav('schedule') },
     { href: '#wins', label: tNav('wins') },
     { href: '#assess', label: tNav('assess') },
-    { href: '#contact', label: tNav('contact') },
+    { href: '#book', label: tNav('contact') },
   ];
 
   return (

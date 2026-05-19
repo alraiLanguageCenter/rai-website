@@ -12,7 +12,6 @@ import { Schedule } from '@/components/sections/Schedule';
 import { StudentStories } from '@/components/sections/StudentStories';
 import { Assessment } from '@/components/sections/Assessment';
 import { Booking } from '@/components/sections/Booking';
-import { Contact } from '@/components/sections/Contact';
 import { Footer } from '@/components/sections/Footer';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -33,7 +32,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <StudentStories />
       <Assessment />
       <Booking />
-      <Contact />
       <Footer />
     </main>
   );
