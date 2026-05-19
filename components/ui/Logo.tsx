@@ -35,8 +35,11 @@ export function Logo({
         <Image
           src="/brand/rlc-logo-transparent.png"
           alt="Rai Language Center"
-          width={192}
-          height={192}
+          /* Intrinsic ratio matches the source PNG (2400×2103 ≈ 1.14:1). The
+             rendered size is controlled by the h-/w- classes below; object-
+             contain preserves the aspect ratio inside the square container. */
+          width={240}
+          height={210}
           priority
           /* Light variant lives in the header — bumped a step up so the
              mark reads clearly on the cream backdrop. Dark variant stays
