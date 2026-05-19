@@ -269,23 +269,7 @@ export function Hero() {
           </Button>
         </motion.div>
 
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.8, duration: 1 }}
-          /* Centred horizontally at the bottom of the hero — the visual
-             "keep scrolling" cue sits below the hero copy column. */
-          className="absolute bottom-10 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-[0.7rem] uppercase tracking-[0.2em] text-[var(--color-ink-soft)] lg:flex"
-        >
-          <span>{t('scrollHint')}</span>
-          <motion.span
-            className="block h-12 w-px bg-[var(--color-ink-soft)]/40"
-            style={{ transformOrigin: 'top' }}
-            animate={{ scaleY: [0.3, 1, 0.3] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </motion.div>
+        <ScrollIndicator label={t('scrollHint')} reduced={!!reduced} />
       </motion.div>
     </section>
   );
@@ -560,5 +544,104 @@ function BlinkingCursor() {
       animate={{ opacity: [1, 1, 0, 0] }}
       transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.51, 1] }}
     />
+  );
+}
+
+/* -------------------- Scroll indicator -------------------- */
+/**
+ * Animated "keep scrolling" cue at the bottom-centre of the hero. Replaces
+ * the old plain text + line with a layered, brand-themed indicator:
+ *   - A subtle gold halo behind everything that breathes in opacity.
+ *   - A mouse-shape outline at the top with a small gold dot that bobs
+ *     up and down inside it.
+ *   - The "SCROLL" label below in cream with a slow letter-spaced reveal.
+ *   - A vertical 56px track tinted gold/15 with a 4-px-tall gold pearl
+ *     that slides from top to bottom continuously, leaving a faint glow.
+ *   - Two thin chevrons at the bottom bouncing on a staggered loop.
+ * Clicking the whole thing scrolls down to the next section (BrandStrip).
+ */
+function ScrollIndicator({ label, reduced }: { label: string; reduced: boolean }) {
+  function onClick() {
+    if (typeof document === 'undefined') return;
+    // Scroll down by one viewport — the user is in the hero, so the next
+    // section is just below the fold.
+    window.scrollBy({ top: window.innerHeight - 80, behavior: 'smooth' });
+  }
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.8, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={reduced ? undefined : { y: -2 }}
+      className="group absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2.5 rounded-full px-3 py-1.5 text-[0.7rem] uppercase tracking-[0.2em] text-[var(--color-ink-soft)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)] lg:flex"
+    >
+      {/* Halo behind everything */}
+      {!reduced && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[var(--color-gold)]/15 blur-2xl"
+          animate={{ opacity: [0.25, 0.7, 0.25], scale: [0.9, 1, 0.9] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      )}
+
+      {/* Mouse-shape with bobbing dot */}
+      <span
+        aria-hidden
+        className="relative grid h-[26px] w-[16px] place-items-center rounded-full border border-[var(--color-rlc-800)]/55 transition-colors group-hover:border-[var(--color-rlc-800)]"
+      >
+        <motion.span
+          className="absolute top-[5px] h-1.5 w-1.5 rounded-full bg-[var(--color-gold)] shadow-[0_0_8px_rgba(201,162,74,0.6)]"
+          animate={reduced ? undefined : { y: [0, 8, 0], opacity: [1, 0.35, 1] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </span>
+
+      {/* "SCROLL" label */}
+      <span className="font-semibold text-[var(--color-rlc-800)] transition group-hover:text-[var(--color-gold)]">
+        {label}
+      </span>
+
+      {/* Vertical track with a gold pearl sliding down */}
+      <span aria-hidden className="relative block h-12 w-px overflow-hidden bg-gradient-to-b from-[var(--color-gold)]/35 via-[var(--color-gold)]/60 to-[var(--color-gold)]/0">
+        {!reduced && (
+          <motion.span
+            className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--color-gold)] shadow-[0_0_10px_rgba(201,162,74,0.85)]"
+            initial={{ top: 0, opacity: 0 }}
+            animate={{ top: ['-10%', '110%'], opacity: [0, 1, 1, 0] }}
+            transition={{
+              duration: 1.9,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.15, 0.85, 1],
+              repeatDelay: 0.4,
+            }}
+          />
+        )}
+      </span>
+
+      {/* Twin chevrons bouncing at the bottom */}
+      <span aria-hidden className="-mt-1 flex flex-col items-center gap-0">
+        {[0, 1].map((n) => (
+          <motion.svg
+            key={n}
+            viewBox="0 0 24 24"
+            className="h-3 w-3 -mt-1 text-[var(--color-gold)]/80"
+            animate={reduced ? undefined : { y: [0, 3, 0], opacity: [0.45, 1, 0.45] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', delay: 0.18 * n }}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </motion.svg>
+        ))}
+      </span>
+    </motion.button>
   );
 }
