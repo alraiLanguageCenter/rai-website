@@ -279,23 +279,43 @@ function KineticWord({
         />
       )}
 
-      <span className={lettersWrapperClass}>
-        {letters.map((ch, i) => (
-          <motion.span
-            key={i}
-            className="inline-block"
-            variants={{
-              hidden: { opacity: 0, y: '0.55em', rotateX: -45 },
-              show: {
-                opacity: 1, y: '0em', rotateX: 0,
-                transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const },
-              },
-            }}
-          >
-            {ch === ' ' ? ' ' : ch}
-          </motion.span>
-        ))}
-      </span>
+      {isArabic ? (
+        /* Arabic MUST stay as a single text node so the browser can shape
+           contextual forms (initial / medial / final) and join the letters.
+           Splitting it per-letter into separate inline-block elements forces
+           every letter into isolated form, visually breaking the word. We
+           still animate it — just as one piece — with the same y / fade-in feel. */
+        <motion.span
+          className={lettersWrapperClass}
+          variants={{
+            hidden: { opacity: 0, y: '0.35em' },
+            show: {
+              opacity: 1, y: '0em',
+              transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const },
+            },
+          }}
+        >
+          {word}
+        </motion.span>
+      ) : (
+        <span className={lettersWrapperClass}>
+          {letters.map((ch, i) => (
+            <motion.span
+              key={i}
+              className="inline-block"
+              variants={{
+                hidden: { opacity: 0, y: '0.55em', rotateX: -45 },
+                show: {
+                  opacity: 1, y: '0em', rotateX: 0,
+                  transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const },
+                },
+              }}
+            >
+              {ch === ' ' ? ' ' : ch}
+            </motion.span>
+          ))}
+        </span>
+      )}
 
       {showDot && (
         <motion.span
