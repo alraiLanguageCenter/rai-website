@@ -129,24 +129,27 @@ export function Journey() {
                     )}
                     <div className="relative">
                       <div className="inline-flex items-center gap-3">
-                        <motion.div
-                          initial={reduced ? false : { scale: 0, rotate: -45 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          viewport={{ once: true, amount: 0.5 }}
-                          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-                          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-gold)] text-[var(--color-rlc-900)] font-[var(--font-display)] text-xl shadow-[0_10px_30px_-10px_rgba(201,162,74,0.7)]"
-                        >
-                          {s.n}
-                          <motion.span
-                            aria-hidden
-                            className="absolute -inset-1 rounded-full border border-[var(--color-gold)]/40"
-                            animate={reduced ? undefined : { scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
-                            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
-                          />
-                        </motion.div>
+                        {/* Big numbered badge only when there's no photo (photo carries its own number stamp) */}
+                        {!photo && (
+                          <motion.div
+                            initial={reduced ? false : { scale: 0, rotate: -45 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            viewport={{ once: true, amount: 0.5 }}
+                            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+                            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-gold)] text-[var(--color-rlc-900)] font-[var(--font-display)] text-xl shadow-[0_10px_30px_-10px_rgba(201,162,74,0.7)]"
+                          >
+                            {s.n}
+                            <motion.span
+                              aria-hidden
+                              className="absolute -inset-1 rounded-full border border-[var(--color-gold)]/40"
+                              animate={reduced ? undefined : { scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
+                              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                          </motion.div>
+                        )}
                         <Icon className="h-5 w-5 text-[var(--color-cream)]/60" />
                       </div>
-                      <h3 className="mt-5 font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl">{s.title}</h3>
+                      <h3 className={`${photo ? 'mt-2' : 'mt-5'} font-[var(--font-display)] text-2xl text-[var(--color-cream)] lg:text-3xl`}>{s.title}</h3>
                       <p className="mt-3 max-w-md text-[var(--color-cream)]/75 leading-relaxed">{s.body}</p>
                       {photo && (
                         <p className="mt-3 text-[0.7rem] uppercase tracking-[0.16em] text-[var(--color-gold)]/80">{t('flipHint')}</p>

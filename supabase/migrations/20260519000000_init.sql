@@ -42,8 +42,15 @@ create index if not exists announcements_active_idx on announcements (published,
 -- =========================================================================
 -- 3. Schedule entries (courses & exams)
 -- =========================================================================
-create type schedule_kind as enum ('course','exam');
-create type schedule_status as enum ('open','closed','full');
+do $$ begin
+  create type schedule_kind as enum ('course','exam');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type schedule_status as enum ('open','closed','full');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists schedule_entries (
   id              uuid primary key default uuid_generate_v4(),
@@ -68,8 +75,15 @@ create index if not exists schedule_starts_idx on schedule_entries (starts_at);
 -- =========================================================================
 -- 4. Assessment bookings (student requests + admin approval)
 -- =========================================================================
-create type booking_status as enum ('pending','approved','rejected','cancelled');
-create type age_group as enum ('child','teen','adult','professional');
+do $$ begin
+  create type booking_status as enum ('pending','approved','rejected','cancelled');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type age_group as enum ('child','teen','adult','professional');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists assessment_bookings (
   id              uuid primary key default uuid_generate_v4(),
