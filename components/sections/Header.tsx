@@ -53,21 +53,39 @@ export function Header() {
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 md:gap-2.5">
           <LocaleSwitch className="hidden md:inline-flex" />
+
+          {/* Login — elegant outlined pill that fills on hover with a small icon swap */}
           <a
             href="/admin/login"
-            className="hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-rlc-800)] ring-1 ring-[var(--color-rlc-800)]/30 transition hover:bg-[var(--color-rlc-800)] hover:text-[var(--color-cream)] hover:ring-[var(--color-rlc-800)] md:inline-flex"
+            className="group relative hidden items-center gap-2 overflow-hidden rounded-full bg-[var(--color-cream)] px-4 py-2 text-sm font-semibold text-[var(--color-rlc-800)] ring-1 ring-[var(--color-rlc-800)]/30 transition-all duration-300 hover:bg-[var(--color-rlc-800)] hover:text-[var(--color-cream)] hover:ring-[var(--color-rlc-800)] hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-12px_rgba(8,57,34,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)] md:inline-flex"
           >
-            <LogIn className="h-3.5 w-3.5" />
-            {t('login')}
+            <span aria-hidden className="grid h-5 w-5 place-items-center rounded-full bg-[var(--color-rlc-800)]/10 text-[var(--color-rlc-800)] transition group-hover:bg-[var(--color-cream)]/20 group-hover:text-[var(--color-gold)]">
+              <LogIn className="h-3 w-3" />
+            </span>
+            <span className="leading-none">{t('login')}</span>
+            <span aria-hidden className="-me-1 inline-block opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5">→</span>
           </a>
-          <Button href="#book" size="md" magnetic className="hidden md:inline-flex">
-            {t('bookSession')}
-          </Button>
+
+          {/* Book a session — primary CTA with magnetic lift + animated glow ring */}
+          <span className="relative hidden md:inline-flex">
+            <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-[var(--color-gold)]/30 blur-md opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <Button
+              href="#book"
+              size="md"
+              magnetic
+              className="relative shadow-[0_14px_28px_-14px_rgba(8,57,34,0.55)] hover:shadow-[0_20px_36px_-14px_rgba(201,162,74,0.55)]"
+            >
+              {t('bookSession')}
+              <span aria-hidden className="ms-0.5 inline-block transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5">→</span>
+            </Button>
+          </span>
+
+          {/* Mobile hamburger */}
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-[var(--color-line)] lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-cream)] text-[var(--color-rlc-800)] ring-1 ring-[var(--color-line)] transition hover:ring-[var(--color-rlc-800)]/40 lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label="Menu"
             aria-expanded={open}
@@ -86,30 +104,34 @@ export function Header() {
         )}
       >
         <div className="border-t border-[var(--color-line)] bg-[var(--color-cream)] px-6 py-6">
-          <nav className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-3">
             {nav.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="text-lg font-semibold text-[var(--color-ink)]"
+                className="group inline-flex items-center justify-between rounded-sm px-3 py-2.5 text-lg font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-rlc-100)] hover:text-[var(--color-rlc-800)]"
               >
                 {item.label}
+                <span aria-hidden className="text-[var(--color-gold)] opacity-0 transition group-hover:opacity-100 rtl:rotate-180">→</span>
               </a>
             ))}
             <a
               href="/admin/login"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center gap-2 text-lg font-semibold text-[var(--color-rlc-800)]"
+              className="group mt-1 inline-flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-4 py-2.5 text-base font-semibold text-[var(--color-rlc-800)] ring-1 ring-[var(--color-rlc-800)]/30 transition hover:bg-[var(--color-rlc-800)] hover:text-[var(--color-cream)] hover:ring-[var(--color-rlc-800)]"
             >
-              <LogIn className="h-4 w-4" />
+              <span aria-hidden className="grid h-5 w-5 place-items-center rounded-full bg-[var(--color-rlc-800)]/10 text-[var(--color-rlc-800)] transition group-hover:bg-[var(--color-cream)]/20 group-hover:text-[var(--color-gold)]">
+                <LogIn className="h-3 w-3" />
+              </span>
               {t('login')}
             </a>
           </nav>
           <div className="mt-6 flex items-center gap-3">
             <LocaleSwitch />
-            <Button href="#book" size="md">
+            <Button href="#book" size="md" magnetic className="shadow-[0_10px_22px_-12px_rgba(8,57,34,0.55)]">
               {t('bookSession')}
+              <span aria-hidden className="rtl:rotate-180">→</span>
             </Button>
           </div>
         </div>

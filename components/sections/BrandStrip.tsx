@@ -11,8 +11,49 @@ import {
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 
-/* Floating background glyphs that drift across the band. */
-const BG_GLYPHS = ['A', 'B', 'C', 'D', 'E', 'F', 'ع', 'ك', 'م', 'ن', 'و', 'ي'];
+/* Floating background glyphs from languages all over the world.
+ * Latin (English, Italian), French accents, Spanish, German, Portuguese,
+ * Cyrillic (Russian), Greek, Arabic, Hebrew, Persian, Hindi (Devanagari),
+ * Thai, Chinese, Japanese (Hiragana + Kanji), Korean, Turkish, Vietnamese,
+ * Polish. Each gets a unique placement / drift / size in the scatter loop. */
+const BG_GLYPHS = [
+  // Latin (English / Italian / Romance)
+  'A', 'B', 'C', 'D', 'E', 'F', 'G',
+  // French accents
+  'É', 'Ç', 'À',
+  // Spanish
+  'Ñ', '¿',
+  // German
+  'Ü', 'Ö', 'ß',
+  // Portuguese
+  'ã',
+  // Cyrillic (Russian)
+  'Я', 'Ж', 'Б', 'Д', 'Ш',
+  // Greek
+  'Ω', 'Σ', 'π', 'α', 'Δ',
+  // Arabic
+  'ع', 'ك', 'م', 'ن', 'و', 'ي',
+  // Hebrew
+  'א', 'ש', 'ב',
+  // Persian (Farsi)
+  'پ', 'چ',
+  // Devanagari (Hindi)
+  'अ', 'क', 'ह',
+  // Thai
+  'ก', 'ข',
+  // Chinese
+  '中', '文', '学', '语',
+  // Japanese (Hiragana + Kanji)
+  'あ', 'い', 'ね', '日',
+  // Korean (Hangul)
+  '한', '글', '안',
+  // Turkish
+  'Ğ', 'Ş',
+  // Vietnamese
+  'Đ', 'ấ',
+  // Polish
+  'Ł', 'Ś',
+];
 
 export function BrandStrip() {
   const t = useTranslations('brandStrip');
@@ -67,8 +108,9 @@ export function BrandStrip() {
             const dur = 12 + (i % 7);
             const delay = (i * 0.7) % 6;
             const tone = i % 3 === 0 ? 'text-[var(--color-gold)]/30' : 'text-[var(--color-cream)]/[0.08]';
-            // On phones, drop every other glyph and clamp size to keep the band airy.
-            const hideOnMobile = i % 2 === 0 ? '' : 'hidden md:block';
+            // On phones, only ~1 in 5 glyphs render — with 50+ in the set the band
+            // would otherwise look crowded on small screens. Desktop sees them all.
+            const hideOnMobile = i % 5 === 0 ? '' : 'hidden md:block';
             return (
               <motion.span
                 key={`${g}-${i}`}
